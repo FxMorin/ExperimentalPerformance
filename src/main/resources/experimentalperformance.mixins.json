@@ -3,6 +3,7 @@
   "minVersion": "0.8",
   "package": "ca.fxco.experimentalperformance.mixin",
   "compatibilityLevel": "JAVA_17",
+  "plugin": "ca.fxco.experimentalperformance.config.SimpleConfigMixinPlugin",
   "mixins": [
     "memoryDensity.Block_memDensityMixin",
     "memoryDensity.Chunk_memDensityMixin",

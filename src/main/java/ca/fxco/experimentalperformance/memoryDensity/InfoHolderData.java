@@ -12,7 +12,6 @@ public class InfoHolderData {
     private static final String ALL_VERSIONS = "*";
     private static final String MINECRAFT_ID = "minecraft";
 
-    private final String holderId;
     private final String targetClassName;
     private final String holderClassName;
     private final List<String> redirectFields;
@@ -30,12 +29,6 @@ public class InfoHolderData {
 
     public InfoHolderData(String targetClassName, String holderClassName, List<String> redirectFields,
                           String modId, String versionPredicate) {
-        this(targetClassName, holderClassName, redirectFields, modId, versionPredicate,
-                modId + ":" + GeneralUtils.getLastPathPart(holderClassName));
-    }
-
-    public InfoHolderData(String targetClassName, String holderClassName, List<String> redirectFields,
-                          String modId, String versionPredicate, String holderId) {
         if (redirectFields.size() == 0)
             throw new IllegalArgumentException("`redirectFields` must have at least 1 field to redirect!");
         if (redirectFields.size() == 1) // Allow 1 field although it's not recommended
@@ -45,12 +38,6 @@ public class InfoHolderData {
         this.redirectFields = redirectFields;
         this.modId = modId;
         this.versionPredicate = versionPredicate;
-        this.holderId = holderId;
-    }
-
-    // This is what we will be using to disable mods with the config
-    public String getHolderId() {
-        return this.holderId;
     }
 
     public String getModId() {
@@ -61,7 +48,13 @@ public class InfoHolderData {
         return this.versionPredicate;
     }
 
+    // Override this method to add your own loading logic
+    public boolean shouldLoad() {
+        return true;
+    }
+
     public void apply() {
+        if (!shouldLoad()) return;
         ClassTinkerers.addTransformation(targetClassName, node -> {
             String className = ExperimentalPerformance.VERBOSE ? GeneralUtils.getLastPathPart(targetClassName) : "";
             AsmUtils.removeFieldsContaining(className, node.fields, redirectFields);
