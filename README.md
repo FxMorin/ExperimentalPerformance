@@ -12,7 +12,7 @@ Chunks are very memory dense and take up 80 bytes. Using some hacky fabric-ASM w
 This allows us to bring the chunk back down to 64, which on some computers can make most chunk operations 0.25x faster!
 #### Block Memory Allocation
 Blocks are also very memory dense, taking up 72 bytes.
-We do the same thing as Chunks, we move stuff info a BlockInfo class and reduce the weight of the class.
+We do the same thing as Chunks, we move stuff into a BlockInfo class and reduce the weight of the class.
 This not only makes it so most blocks can now be passed along faster, but also prevents some blocks from going over 128 bytes, which would need 3 cache lines.
 
 ### Why is Mojang not doing this?
