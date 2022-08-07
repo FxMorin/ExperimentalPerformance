@@ -6,7 +6,6 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.VersionParsingException;
 import net.fabricmc.loader.api.metadata.version.VersionPredicate;
-import org.objectweb.asm.Type;
 
 import java.util.Optional;
 
@@ -26,9 +25,5 @@ public class HolderUtils {
             }
         }
         return false;
-    }
-
-    public static String getClassName(Class<?> clazz) {
-        return Type.getInternalName(clazz);
     }
 }
