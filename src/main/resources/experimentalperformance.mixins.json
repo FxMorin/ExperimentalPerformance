@@ -4,9 +4,9 @@
   "package": "ca.fxco.experimentalperformance.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "BlockMixin",
-    "ChunkMixin",
-    "EntityMixin"
+    "memoryDensity.Block_memDensityMixin",
+    "memoryDensity.Chunk_memDensityMixin",
+    "memoryDensity.Entity_memDensityMixin"
   ],
   "injectors": {
     "defaultRequire": 1

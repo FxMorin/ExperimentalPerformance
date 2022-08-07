@@ -1,4 +1,4 @@
-package ca.fxco.experimentalperformance.infoHolders;
+package ca.fxco.experimentalperformance.memoryDensity.infoHolders;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.item.Item;

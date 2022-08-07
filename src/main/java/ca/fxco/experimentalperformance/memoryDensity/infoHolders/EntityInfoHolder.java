@@ -1,4 +1,4 @@
-package ca.fxco.experimentalperformance.infoHolders;
+package ca.fxco.experimentalperformance.memoryDensity.infoHolders;
 
 import net.minecraft.entity.TrackedPosition;
 import net.minecraft.fluid.Fluid;

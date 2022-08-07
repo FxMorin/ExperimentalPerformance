@@ -1,4 +1,4 @@
-package ca.fxco.experimentalperformance.infoHolders;
+package ca.fxco.experimentalperformance.memoryDensity.infoHolders;
 
 import net.minecraft.structure.StructureStart;
 import net.minecraft.world.biome.GenerationSettings;
