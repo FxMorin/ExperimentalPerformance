@@ -31,3 +31,7 @@ Put simply, computers are not simple. They try really hard to make it easier for
 What am I talking about?
 Well the performance I get with this mod comes at a cost, extra calls and memory allocation. I'm simply optimizing the structures within the game to work as smoothly and quickly with the computer, although that requires the computer to remember more things. 
 Unfortunately, you won't notice that cost since in most of these situations the performance win greatly overcomes the loss.
+
+### Thanks to
+[LlamaLad7](https://github.com/LlamaLad7) - Large contribution to the ASM logic in order to make it much simpler with less overhead  
+[Fabric-ASM](https://github.com/Chocohead/Fabric-ASM) - The tool that allows me to easily nuke fields without having to crack my skull open  
