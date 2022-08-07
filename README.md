@@ -14,6 +14,10 @@ This allows us to bring the chunk back down to 64, which on some computers can m
 Blocks are also very memory dense, taking up 72 bytes.
 We do the same thing as Chunks, we move stuff into a BlockInfo class and reduce the weight of the class.
 This not only makes it so most blocks can now be passed along faster, but also prevents some blocks from going over 128 bytes, which would need 3 cache lines.
+#### Entity Memory Allocation
+Unlike Chunk & Block, entity is its own nightmare. It takes up 272 bytes, which is 5 cache lines. No wonder entities are laggy xD
+I've optimized it to 4 cache lines, although going any further will break more mod compatibility than I have the time to fix.
+If the mod grows big enough at some point, I may rewrite the entire entity class and just provide an API for the values you would want.
 
 ### Why is Mojang not doing this?
 Well they kinda are?
