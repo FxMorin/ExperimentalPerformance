@@ -2,6 +2,7 @@ package ca.fxco.experimentalperformance.memoryDensity;
 
 import ca.fxco.experimentalperformance.ExperimentalPerformance;
 import ca.fxco.experimentalperformance.utils.AsmUtils;
+import ca.fxco.experimentalperformance.utils.GeneralUtils;
 import com.chocohead.mm.api.ClassTinkerers;
 
 import java.util.List;
@@ -11,6 +12,7 @@ public class InfoHolderData {
     private static final String ALL_VERSIONS = "*";
     private static final String MINECRAFT_ID = "minecraft";
 
+    private final String holderId;
     private final String targetClassName;
     private final String holderClassName;
     private final List<String> redirectFields;
@@ -26,8 +28,14 @@ public class InfoHolderData {
         this(targetClassName, holderClassName, redirectFields, modId, ALL_VERSIONS);
     }
 
-    public InfoHolderData(String targetClassName, String holderClassName,
-                           List<String> redirectFields, String modId, String versionPredicate) {
+    public InfoHolderData(String targetClassName, String holderClassName, List<String> redirectFields,
+                          String modId, String versionPredicate) {
+        this(targetClassName, holderClassName, redirectFields, modId, versionPredicate,
+                modId + ":" + GeneralUtils.getLastPathPart(holderClassName));
+    }
+
+    public InfoHolderData(String targetClassName, String holderClassName, List<String> redirectFields,
+                          String modId, String versionPredicate, String holderId) {
         if (redirectFields.size() == 0)
             throw new IllegalArgumentException("`redirectFields` must have at least 1 field to redirect!");
         if (redirectFields.size() == 1) // Allow 1 field although it's not recommended
@@ -37,6 +45,12 @@ public class InfoHolderData {
         this.redirectFields = redirectFields;
         this.modId = modId;
         this.versionPredicate = versionPredicate;
+        this.holderId = holderId;
+    }
+
+    // This is what we will be using to disable mods with the config
+    public String getHolderId() {
+        return this.holderId;
     }
 
     public String getModId() {
@@ -49,15 +63,11 @@ public class InfoHolderData {
 
     public void apply() {
         ClassTinkerers.addTransformation(targetClassName, node -> {
-            String className;
-            if (ExperimentalPerformance.VERBOSE) {
-                String[] classPath = targetClassName.split("/");
-                className = classPath[classPath.length - 1];
-            } else {
-                className = "";
-            }
+            String className = ExperimentalPerformance.VERBOSE ? GeneralUtils.getLastPathPart(targetClassName) : "";
             AsmUtils.removeFieldsContaining(className, node.fields, redirectFields);
             AsmUtils.redirectFieldsToInfoHolder(node.methods, targetClassName, holderClassName, redirectFields);
         });
     }
+
+    //May want to setup a builder if I add any more options
 }
