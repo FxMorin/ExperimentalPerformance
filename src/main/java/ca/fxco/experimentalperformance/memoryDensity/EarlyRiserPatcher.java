@@ -1,6 +1,7 @@
 package ca.fxco.experimentalperformance.memoryDensity;
 
 import ca.fxco.experimentalperformance.utils.HolderUtils;
+import net.fabricmc.loader.api.FabricLoader;
 
 import java.util.List;
 
@@ -28,12 +29,22 @@ public class EarlyRiserPatcher implements Runnable {
                             "pistonMovementTick", "lastChimeIntensity", "lastChimeAge"))
     );
 
-    @Override
-    public void run() {
-        // Here you will run all the infoHolders.
+    private static void attemptToApplyHolders(List<InfoHolderData> infoHolderDataList) {
         for (InfoHolderData infoHolderData : infoHolderDataList)
             if (HolderUtils.shouldRunHolder(infoHolderData))
                 infoHolderData.apply(); // Run class tweaker
-        // TODO: Add entrypoint here so other mods can add there own infoHolderData
+    }
+
+    @Override
+    public void run() {
+        // Here you will run all the infoHolders.
+        attemptToApplyHolders(infoHolderDataList); // Run built-in holder data list first
+        // Remember that this entrypoint is an early riser!
+        FabricLoader.getInstance()
+                .getEntrypointContainers("experimentalperformance-holder", HolderDataContainer.class)
+                .forEach(entrypoint -> {
+                    HolderDataContainer container = entrypoint.getEntrypoint();
+                    attemptToApplyHolders(container.getHolderDataList()); // Run holder data list for mod
+                });
     }
 }
