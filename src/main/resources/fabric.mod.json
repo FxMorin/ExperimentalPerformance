@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "experimentalperformance",
+  "version": "${version}",
+  "name": "ExperimentalPerformance",
+  "description": "A mod that does extremely sketchy stuff to gain large performance, mostly using memory",
+  "authors": [
+    "FX"
+  ],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/experimentalPerformance/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "mm:early_risers": [
+      "ca.fxco.experimentalperformance.asm.ModifyChunk"
+    ],
+    "main": [
+      "ca.fxco.experimentalperformance.ExperimentalPerformance"
+    ]
+  },
+  "mixins": [
+    "experimentalperformance.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.14.9",
+    "minecraft": "1.19.2"
+  }
+}
