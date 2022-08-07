@@ -13,7 +13,8 @@
   "environment": "*",
   "entrypoints": {
     "mm:early_risers": [
-      "ca.fxco.experimentalperformance.asm.ModifyChunk"
+      "ca.fxco.experimentalperformance.asm.ModifyChunk",
+      "ca.fxco.experimentalperformance.asm.ModifyBlock"
     ],
     "main": [
       "ca.fxco.experimentalperformance.ExperimentalPerformance"

@@ -4,6 +4,7 @@
   "package": "ca.fxco.experimentalperformance.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "BlockMixin",
     "ChunkMixin",
     "WorldChunkMixin"
   ],

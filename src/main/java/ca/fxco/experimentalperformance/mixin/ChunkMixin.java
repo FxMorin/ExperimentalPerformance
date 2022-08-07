@@ -23,6 +23,7 @@ import java.util.function.Supplier;
 @Mixin(Chunk.class)
 public abstract class ChunkMixin {
 
+    @Unique
     private ChunkInfo chunkInfo;
 
     public ChunkMixin(ChunkInfo chunkInfo) {
