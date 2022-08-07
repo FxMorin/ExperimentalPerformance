@@ -21,6 +21,10 @@ public class NodeUtils {
         }
     }
 
+    public static void printInstructions(InsnList instructions) {
+        printInstructions(instructions, true);
+    }
+
     public static void printInstructions(InsnList instructions, boolean numbered) {
         for (int i = 0; i < instructions.size(); i++) {
             AbstractInsnNode instructionNode = instructions.get(i);

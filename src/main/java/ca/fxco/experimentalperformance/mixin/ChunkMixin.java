@@ -26,11 +26,6 @@ public abstract class ChunkMixin {
     @Unique
     private ChunkInfo chunkInfo;
 
-    public ChunkMixin(ChunkInfo chunkInfo) {
-        this.chunkInfo = chunkInfo;
-        throw new IllegalStateException();
-    }
-
 
     @Inject(
             method = "<init>(Lnet/minecraft/util/math/ChunkPos;Lnet/minecraft/world/chunk/UpgradeData;" +
