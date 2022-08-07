@@ -10,7 +10,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Map;
 
 public class ChunkInfoHolder {
-    // TODO: Add support to make some of these final by passing arguments through the constructor
+    // TODO: Add support to make these final if the original value is final,
+    //  than create constructor argument to pass value through
     public long inhabitedTime;
     @Nullable
     public GenerationSettings generationSettings;
