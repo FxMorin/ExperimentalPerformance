@@ -5,7 +5,7 @@
   "name": "ExperimentalPerformance",
   "description": "A mod that does extremely sketchy stuff to gain large performance, mostly using memory",
   "authors": [
-    "FX"
+    "FX - PR0CESS"
   ],
   "contact": {},
   "license": "MIT",
@@ -24,6 +24,6 @@
   ],
   "depends": {
     "fabricloader": ">=0.13",
-    "minecraft": ">=1.15"
+    "minecraft": ">=1.18"
   }
 }

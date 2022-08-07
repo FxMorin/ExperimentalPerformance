@@ -6,8 +6,10 @@
   "plugin": "ca.fxco.experimentalperformance.config.SimpleConfigMixinPlugin",
   "mixins": [
     "memoryDensity.Block_memDensityMixin",
-    "memoryDensity.Chunk_memDensityMixin",
-    "memoryDensity.Entity_memDensityMixin"
+    "memoryDensity.Chunk_1_18_memDensityMixin",
+    "memoryDensity.Chunk_1_19_memDensityMixin",
+    "memoryDensity.Entity_1_18_memDensityMixin",
+    "memoryDensity.Entity_1_19_memDensityMixin",
   ],
   "injectors": {
     "defaultRequire": 1

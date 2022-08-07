@@ -16,4 +16,12 @@ public interface HolderDataContainer {
      @since v0.1.0
      */
     Map<String, InfoHolderData> getHolderDataList();
+
+    /**
+     This should return a map of {@link VersionedInfoHolderData} which is a list of InfoHolderData that all do the
+     same thing although they do it a bit different for every version.
+     The key is the id of the holder, this is what will be used in the config file.
+     @since v0.1.0
+     */
+    Map<String, VersionedInfoHolderData> getVersionedHolderDataList();
 }

@@ -14,8 +14,6 @@ public class ChunkInfoHolder {
     //  than create constructor argument to pass value through
     public long inhabitedTime;
     @Nullable
-    public GenerationSettings generationSettings;
-    @Nullable
     public ChunkNoiseSampler chunkNoiseSampler;
     @Nullable
     public BlendingData blendingData;

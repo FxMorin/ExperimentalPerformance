@@ -2,10 +2,10 @@ package ca.fxco.experimentalperformance.config;
 
 import ca.fxco.experimentalperformance.ExperimentalPerformance;
 import ca.fxco.experimentalperformance.memoryDensity.HolderId;
+import me.fallenbreath.conditionalmixin.api.mixin.RestrictiveMixinConfigPlugin;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.tree.AnnotationNode;
 import org.objectweb.asm.tree.ClassNode;
-import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 import org.spongepowered.asm.service.MixinService;
 import org.spongepowered.asm.util.Annotations;
@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
-public class SimpleConfigMixinPlugin implements IMixinConfigPlugin {
+public class SimpleConfigMixinPlugin extends RestrictiveMixinConfigPlugin {
 
     @Override
     public void onLoad(String mixinPackage) {

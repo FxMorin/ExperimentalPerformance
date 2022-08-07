@@ -7,10 +7,10 @@ import com.chocohead.mm.api.ClassTinkerers;
 
 import java.util.List;
 
-public class InfoHolderData {
+import static ca.fxco.experimentalperformance.memoryDensity.HolderDataRegistry.ALL_VERSIONS;
+import static ca.fxco.experimentalperformance.memoryDensity.HolderDataRegistry.MINECRAFT_ID;
 
-    private static final String ALL_VERSIONS = "*";
-    private static final String MINECRAFT_ID = "minecraft";
+public class InfoHolderData {
 
     private final String targetClassName;
     private final String holderClassName;
@@ -19,16 +19,16 @@ public class InfoHolderData {
     private final String versionPredicate;
 
     public InfoHolderData(String targetClassName, String holderClassName, List<String> redirectFields) {
-        this(targetClassName, holderClassName, redirectFields, MINECRAFT_ID);
+        this(targetClassName, holderClassName, redirectFields, ALL_VERSIONS);
     }
 
     public InfoHolderData(String targetClassName, String holderClassName,
-                           List<String> redirectFields, String modId) {
-        this(targetClassName, holderClassName, redirectFields, modId, ALL_VERSIONS);
+                           List<String> redirectFields, String versionPredicate) {
+        this(targetClassName, holderClassName, redirectFields, versionPredicate, MINECRAFT_ID);
     }
 
     public InfoHolderData(String targetClassName, String holderClassName, List<String> redirectFields,
-                          String modId, String versionPredicate) {
+                          String versionPredicate, String modId) {
         if (redirectFields.size() == 0)
             throw new IllegalArgumentException("`redirectFields` must have at least 1 field to redirect!");
         if (redirectFields.size() == 1) // Allow 1 field although it's not recommended
@@ -40,11 +40,15 @@ public class InfoHolderData {
         this.versionPredicate = versionPredicate;
     }
 
+    public String getHolderClassName() {
+        return this.holderClassName;
+    }
+
     public String getModId() {
         return this.modId;
     }
 
-    public String getversionPredicate() {
+    public String getVersionPredicate() {
         return this.versionPredicate;
     }
 
