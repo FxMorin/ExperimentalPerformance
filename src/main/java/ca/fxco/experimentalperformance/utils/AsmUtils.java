@@ -1,11 +1,9 @@
 package ca.fxco.experimentalperformance.utils;
 
 import ca.fxco.experimentalperformance.ExperimentalPerformance;
-import org.objectweb.asm.ConstantDynamic;
-import org.objectweb.asm.Handle;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
+import org.objectweb.asm.*;
 import org.objectweb.asm.tree.*;
+import org.spongepowered.asm.util.Bytecode;
 
 import java.util.Iterator;
 import java.util.List;
@@ -29,8 +27,9 @@ public class AsmUtils {
         return new FieldNode(Opcodes.ACC_PRIVATE + Opcodes.ACC_FINAL, "infoHolder", 'L' + holderClassName + ';', null, null);
     }
 
-    public static void redirectFieldsToInfoHolder(List<MethodNode> methods, String targetClass,
+    public static void redirectFieldsToInfoHolder(List<MethodNode> methods, String superClass, String targetClass,
                                                   String holderClass, List<String> redirectFields) {
+        boolean hasInjectedInfoHolder = false;
         for (MethodNode methodNode : methods) {
             for (ListIterator<AbstractInsnNode> it = methodNode.instructions.iterator(); it.hasNext(); ) {
                 AbstractInsnNode insn = it.next();
@@ -48,6 +47,23 @@ public class AsmUtils {
                     }
                 }
             }
+            if (!hasInjectedInfoHolder) {
+                if (methodNode.name.equals("<cinit>") || methodNode.name.equals("<init>")) {
+                    hasInjectedInfoHolder = true;
+                    Bytecode.DelegateInitialiser delegateInit = Bytecode.findDelegateInit(methodNode, superClass, targetClass);
+                    InsnList injectInfoHolder = new InsnList();
+                    injectInfoHolder.add(new VarInsnNode(Opcodes.ALOAD, 0));
+                    injectInfoHolder.add(new TypeInsnNode(Opcodes.NEW, holderClass));
+                    injectInfoHolder.add(new InsnNode(Opcodes.DUP));
+                    injectInfoHolder.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, holderClass, "<init>", "()V"));
+                    injectInfoHolder.add(new FieldInsnNode(Opcodes.PUTFIELD, targetClass, "infoHolder", 'L' + holderClass + ';'));
+                    if (delegateInit.isPresent) {
+                        methodNode.instructions.insert(delegateInit.insn, injectInfoHolder);
+                    } else {
+                        methodNode.instructions.insertBefore(methodNode.instructions.getFirst(), injectInfoHolder);
+                    }
+                }
+            }
         }
     }
 
@@ -59,7 +75,7 @@ public class AsmUtils {
 
     private static void replaceFieldSet(ListIterator<AbstractInsnNode> it, FieldInsnNode fieldInsn,
                                        String newFieldName, String holderClassName) {
-        var size = Type.getType(fieldInsn.desc).getSize();
+        int size = Type.getType(fieldInsn.desc).getSize();
         if (size == 2) {
             it.add(new InsnNode(Opcodes.DUP2_X1));
             it.add(new InsnNode(Opcodes.POP2));

@@ -77,7 +77,7 @@ public class InfoHolderData {
             generator.createInfoHolder(node, holderClassName, redirectFields);
             AsmUtils.removeFieldsContaining(className, node.fields, redirectFields);
             node.fields.add(AsmUtils.generateInfoHolderField(holderClassName));
-            AsmUtils.redirectFieldsToInfoHolder(node.methods, targetClassName, holderClassName, redirectFields);
+            AsmUtils.redirectFieldsToInfoHolder(node.methods, node.superName, targetClassName, holderClassName, redirectFields);
         });
     }
 
