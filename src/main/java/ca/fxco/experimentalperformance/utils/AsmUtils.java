@@ -1,6 +1,8 @@
 package ca.fxco.experimentalperformance.utils;
 
 import ca.fxco.experimentalperformance.ExperimentalPerformance;
+import org.objectweb.asm.ConstantDynamic;
+import org.objectweb.asm.Handle;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
@@ -21,6 +23,12 @@ public class AsmUtils {
                     System.out.println("Removed `" + fieldName + "` from `" + className + "`");
             }
         }
+    }
+
+    public static FieldNode generateInfoHolderField(String holderClassName, Class<?> infoHolder) {
+        Handle handle = new Handle(Opcodes.H_NEWINVOKESPECIAL, "java/lang/Object", "<init>", holderClassName, false);
+        ConstantDynamic constantDynamic = new ConstantDynamic(infoHolder.getName(), infoHolder.descriptorString(), handle);
+        return new FieldNode(Opcodes.ACC_PRIVATE + Opcodes.ACC_FINAL, "infoHolder", holderClassName, null, constantDynamic);
     }
 
     public static void redirectFieldsToInfoHolder(List<MethodNode> methods, String targetClass,
