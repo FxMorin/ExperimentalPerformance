@@ -26,7 +26,7 @@ public class AsmUtils {
     }
 
     public static FieldNode generateInfoHolderField(String holderClassName, Class<?> infoHolder) {
-        Handle handle = new Handle(Opcodes.H_NEWINVOKESPECIAL, "java/lang/Object", "<init>", holderClassName, false);
+        Handle handle = new Handle(Opcodes.H_NEWINVOKESPECIAL, "java/lang/Object", "infoHolder", holderClassName, false);
         ConstantDynamic constantDynamic = new ConstantDynamic(infoHolder.getName(), infoHolder.descriptorString(), handle);
         return new FieldNode(Opcodes.ACC_PRIVATE + Opcodes.ACC_FINAL, "infoHolder", holderClassName, null, constantDynamic);
     }
