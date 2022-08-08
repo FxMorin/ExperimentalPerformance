@@ -22,8 +22,8 @@ If the mod grows big enough at some point, I may rewrite the entire entity class
 ### Why is Mojang not doing this?
 Well they kinda are?  
 When making my optimizations I noticed that mojang has actually made the same performance improvements that I'm doing. Such as LevelInfo, although that was years ago?  
-Mojang does not seem to care about performance much these days, they make really weird performance changes but never seem to really care too much. Some classes have grown a lot in the last years, and they haven't really notices how dense they have become.  
-That's fine tho, cause im here to help.
+Mojang does not seem to care about performance much these days, they make really weird performance changes but never seem to really care too much. Some classes have grown a lot in the last years, and they haven't really noticed how dense they have become.  
+That's fine tho, cause I'm here to help.
   
 ### The game of cat and mouse  
 Performance is hard to get more of, it's a very complex puzzle which requires you to understand every single part of it in a lot of detail.  
