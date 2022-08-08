@@ -11,15 +11,9 @@ public class HolderDataRegistry {
     public static final String MINECRAFT_ID = "minecraft";
 
     private static final String MINECRAFT_PATH = "net/minecraft/";
-    private static final String INFOHOLDER_PATH = "ca/fxco/experimentalperformance/memoryDensity/infoHolders/";
 
     public static String mc(String str) {
         return MINECRAFT_PATH + str;
-    }
-
-    // Used for my own personal info holders
-    private static String infoHolder(String str) { // Used for my own personal info holders
-        return INFOHOLDER_PATH + str;
     }
 
     // Use this for my own personal id's
@@ -33,13 +27,11 @@ public class HolderDataRegistry {
     ======================*/
     public static InfoHolderData infoHolder_Block = new InfoHolderData(
             mc("block/Block"),
-            infoHolder("BlockInfoHolder"),
             List.of("defaultState", "translationKey", "cachedItem")
     );
 
     public static InfoHolderData infoHolder_EntityExtreme = new InfoHolderData(
             mc("entity/Entity"),
-            infoHolder("EntityExtremeInfoHolder"),
             List.of("id", "type", "passengerList", "vehicle", "pos", "blockPos", "chunkPos", "velocity",
                     "yaw", "pitch", "boundingBox", "removalReason", "fireTicks"),
             ALL_VERSIONS,
@@ -55,16 +47,8 @@ public class HolderDataRegistry {
             mc("world/chunk/Chunk"),
             List.of("inhabitedTime", "blendingData", "structureStarts", "chunkNoiseSampler"),
             List.of(
-                VersionedInfoHolderData.part(
-                        infoHolder("v1_19/ChunkInfoHolder_1_19"),
-                        List.of("generationSettings"),
-                        "1.19.x"
-                ),
-                VersionedInfoHolderData.part(
-                        infoHolder("v1_18/ChunkInfoHolder_1_18"),
-                        List.of("biome"),
-                        "1.18.x"
-                )
+                VersionedInfoHolderData.part(List.of("generationSettings"), "1.19.x"),
+                VersionedInfoHolderData.part(List.of("biome"), "1.18.x")
             )
     );
 
@@ -73,16 +57,8 @@ public class HolderDataRegistry {
             List.of("submergedFluidTag", "trackedPosition", "portalCooldown", "pistonMovementTick",
                     "lastChimeIntensity", "lastChimeAge", "nextStepSoundDistance"),
             List.of(
-                VersionedInfoHolderData.part(
-                        infoHolder("v1_19/EntityInfoHolder_1_19"),
-                        List.of(),
-                        "1.19.x"
-                ),
-                VersionedInfoHolderData.part(
-                        infoHolder("v1_18/EntityInfoHolder_1_18"),
-                        List.of(),
-                        "1.18.x"
-                )
+                VersionedInfoHolderData.part("1.19.x"),
+                VersionedInfoHolderData.part("1.18.x")
             )
     );
 

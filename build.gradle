@@ -27,9 +27,6 @@ dependencies {
 
     modImplementation "com.github.Chocohead:Fabric-ASM:${project.fabric_asm_version}"
     include "com.github.Chocohead:Fabric-ASM:${project.fabric_asm_version}"
-
-    modImplementation "com.github.Fallen-Breath:conditional-mixin:${project.conditional_mixin_version}"
-    include "com.github.Fallen-Breath:conditional-mixin:${project.conditional_mixin_version}"
 }
 
 processResources {
