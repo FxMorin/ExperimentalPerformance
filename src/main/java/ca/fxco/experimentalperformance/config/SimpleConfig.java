@@ -1,8 +1,9 @@
 package ca.fxco.experimentalperformance.config;
 
 import ca.fxco.experimentalperformance.ExperimentalPerformance;
-import ca.fxco.experimentalperformance.memoryDensity.EarlyRiserPatcher;
+import ca.fxco.experimentalperformance.memoryDensity.HolderDataRegistry;
 import ca.fxco.experimentalperformance.memoryDensity.InfoHolderData;
+import ca.fxco.experimentalperformance.memoryDensity.VersionedInfoHolderData;
 import net.fabricmc.loader.api.FabricLoader;
 
 import java.io.BufferedWriter;
@@ -33,7 +34,7 @@ public class SimpleConfig {
     }
 
     public boolean shouldLoad(String id) {
-        return validHolders.contains(id);
+        return this.validHolders.contains(id);
     }
 
     public void clearHolders() {
@@ -80,7 +81,15 @@ public class SimpleConfig {
             writer.write("# This is the ExperimentalPerformance mod config\n");
             writer.write("# Use this config to change what options should be enabled or disabled\n");
             writer.write("#\n");
-            writer.write("# No options exist here by default, you will need to check the wiki to disable options\n");
+            writer.write("# The default value will be placed here when writing the config for the first time\n\n");
+            for (Map.Entry<String, InfoHolderData> entry : HolderDataRegistry.infoHolderDataMap.entrySet()) {
+                writer.write(entry.getKey() + "=" + entry.getValue().getDefaultValue() + "\n");
+                if (entry.getValue().getDefaultValue()) this.validHolders.add(entry.getKey());
+            }
+            for (Map.Entry<String, VersionedInfoHolderData> entry : HolderDataRegistry.versionedInfoHolderDataMap.entrySet()) {
+                writer.write(entry.getKey() + "=" + entry.getValue().getDefaultValue() + "\n");
+                if (entry.getValue().getDefaultValue()) this.validHolders.add(entry.getKey());
+            }
         }
     }
 }

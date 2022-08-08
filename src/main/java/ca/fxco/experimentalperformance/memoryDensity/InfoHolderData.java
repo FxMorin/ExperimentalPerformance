@@ -17,6 +17,7 @@ public class InfoHolderData {
     private final List<String> redirectFields;
     private final String modId;
     private final String versionPredicate;
+    private final boolean defaultValue;
 
     public InfoHolderData(String targetClassName, String holderClassName, List<String> redirectFields) {
         this(targetClassName, holderClassName, redirectFields, ALL_VERSIONS);
@@ -29,6 +30,11 @@ public class InfoHolderData {
 
     public InfoHolderData(String targetClassName, String holderClassName, List<String> redirectFields,
                           String versionPredicate, String modId) {
+        this(targetClassName, holderClassName, redirectFields, versionPredicate, modId, true);
+    }
+
+    public InfoHolderData(String targetClassName, String holderClassName, List<String> redirectFields,
+                          String versionPredicate, String modId, boolean defaultValue) {
         if (redirectFields.size() == 0)
             throw new IllegalArgumentException("`redirectFields` must have at least 1 field to redirect!");
         if (redirectFields.size() == 1) // Allow 1 field although it's not recommended
@@ -38,6 +44,11 @@ public class InfoHolderData {
         this.redirectFields = redirectFields;
         this.modId = modId;
         this.versionPredicate = versionPredicate;
+        this.defaultValue = defaultValue;
+    }
+
+    public boolean getDefaultValue() {
+        return this.defaultValue;
     }
 
     public String getHolderClassName() {

@@ -7,6 +7,7 @@ public class VersionedInfoHolderData {
     private final String targetClassName;
     private final List<String> redirectFields;
     private final String modId;
+    private final boolean defaultValue;
 
     private final List<InfoHolderPart> holderVersions;
 
@@ -17,10 +18,20 @@ public class VersionedInfoHolderData {
 
     public VersionedInfoHolderData(String targetClassName, List<String> redirectFields,
                                    List<InfoHolderPart> holderVersions, String modId) {
+        this(targetClassName, redirectFields, holderVersions, modId, true);
+    }
+
+    public VersionedInfoHolderData(String targetClassName, List<String> redirectFields,
+                                   List<InfoHolderPart> holderVersions, String modId, boolean defaultValue) {
         this.targetClassName = targetClassName;
         this.holderVersions = holderVersions;
         this.redirectFields = redirectFields;
         this.modId = modId;
+        this.defaultValue = defaultValue;
+    }
+
+    public boolean getDefaultValue() {
+        return this.defaultValue;
     }
 
     public String getTargetClassName() {
