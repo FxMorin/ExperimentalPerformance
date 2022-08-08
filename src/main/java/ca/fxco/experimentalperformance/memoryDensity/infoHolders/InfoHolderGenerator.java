@@ -13,7 +13,7 @@ public class InfoHolderGenerator {
 
     public InfoHolderGenerator() {}
 
-    public Class<?> createInfoHolder(ClassNode targetClassNode, String holderClassName, List<String> redirectFields) {
+    public void createInfoHolder(ClassNode targetClassNode, String holderClassName, List<String> redirectFields) {
         ClassNode node = new ClassNode();
         node.name = holderClassName;
         node.superName = "java/lang/Object";
@@ -25,23 +25,16 @@ public class InfoHolderGenerator {
             for (String fieldName : redirectFields) {
                 for (FieldNode fieldNode : targetClassNode.fields) {
                     if (fieldNode.name.equals(fieldName)) {
-                        node.fields.add(new FieldNode(
-                                Opcodes.ACC_PUBLIC,
-                                fieldName,
-                                fieldNode.desc,
-                                fieldNode.signature,
-                                fieldNode.value
-                        ));
+                        cw.visitField(Opcodes.ACC_PUBLIC, fieldName, fieldNode.desc, fieldNode.signature, fieldNode.value).visitEnd();
                         break;
                     }
                 }
             }
             addConstructor(cw);
-            return MethodHandles.lookup().in(InfoHolderGenerator.class).defineClass(cw.toByteArray());
+            MethodHandles.lookup().in(InfoHolderGenerator.class).defineClass(cw.toByteArray());
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
-        return null;
     }
 
     private static void addConstructor(ClassWriter cw) {

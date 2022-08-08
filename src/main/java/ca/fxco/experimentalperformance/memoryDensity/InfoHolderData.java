@@ -74,10 +74,9 @@ public class InfoHolderData {
         ClassTinkerers.addTransformation(targetClassName, node -> {
             String className = ExperimentalPerformance.VERBOSE ? GeneralUtils.getLastPathPart(targetClassName) : "";
             InfoHolderGenerator generator = new InfoHolderGenerator();
-            Class<?> infoHolderClass = generator.createInfoHolder(node, holderClassName, redirectFields);
-            System.out.println(infoHolderClass);
+            generator.createInfoHolder(node, holderClassName, redirectFields);
             AsmUtils.removeFieldsContaining(className, node.fields, redirectFields);
-            node.fields.add(AsmUtils.generateInfoHolderField(holderClassName, infoHolderClass)); // Attempt to add field to class (basically replace the mixin)
+            node.fields.add(AsmUtils.generateInfoHolderField(holderClassName));
             AsmUtils.redirectFieldsToInfoHolder(node.methods, targetClassName, holderClassName, redirectFields);
         });
     }
