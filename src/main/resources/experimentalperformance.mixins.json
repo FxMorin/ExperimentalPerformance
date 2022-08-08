@@ -10,6 +10,7 @@
     "memoryDensity.Chunk_1_19_memDensityMixin",
     "memoryDensity.Entity_1_18_memDensityMixin",
     "memoryDensity.Entity_1_19_memDensityMixin",
+    "memoryDensity.Entity_extremeMixin"
   ],
   "injectors": {
     "defaultRequire": 1

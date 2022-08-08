@@ -37,6 +37,17 @@ public class HolderDataRegistry {
             List.of("defaultState", "translationKey", "cachedItem")
     );
 
+    public static InfoHolderData infoHolder_EntityExtreme = new InfoHolderData(
+            mc("entity/Entity"),
+            infoHolder("EntityExtremeInfoHolder"),
+            List.of("id", "type", "passengerList", "vehicle", "pos", "blockPos", "chunkPos", "velocity",
+                    "yaw", "pitch", "boundingBox", "removalReason", "fireTicks"),
+            ALL_VERSIONS,
+            MINECRAFT_ID,
+            false
+    );
+
+
     /*================================
       VERSIONED INFO HOLDER DATA MAP
     ================================*/
@@ -60,7 +71,7 @@ public class HolderDataRegistry {
     public static VersionedInfoHolderData infoHolder_Entity = new VersionedInfoHolderData(
             mc("entity/Entity"),
             List.of("submergedFluidTag", "trackedPosition", "portalCooldown", "pistonMovementTick",
-                    "lastChimeIntensity", "lastChimeAge"),
+                    "lastChimeIntensity", "lastChimeAge", "nextStepSoundDistance"),
             List.of(
                 VersionedInfoHolderData.part(
                         infoHolder("v1_19/EntityInfoHolder_1_19"),
@@ -77,7 +88,8 @@ public class HolderDataRegistry {
 
 
     public static final Map<String, InfoHolderData> infoHolderDataMap = Map.of(
-            ep("Block"), infoHolder_Block
+            ep("Block"), infoHolder_Block,
+            ep("EntityExtreme"), infoHolder_EntityExtreme
     );
 
     public static final Map<String, VersionedInfoHolderData> versionedInfoHolderDataMap = Map.of(

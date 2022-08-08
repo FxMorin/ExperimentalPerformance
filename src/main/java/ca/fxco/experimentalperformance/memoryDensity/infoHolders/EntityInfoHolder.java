@@ -11,4 +11,5 @@ public class EntityInfoHolder {
     public long pistonMovementTick;
     public float lastChimeIntensity;
     public int lastChimeAge;
+    public float nextStepSoundDistance;
 }
