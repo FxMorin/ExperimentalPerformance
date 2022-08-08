@@ -50,15 +50,15 @@ public class VersionedInfoHolderData {
         return this.holderVersions;
     }
 
-    public static InfoHolderPart part(String holderClass, List<String> extraRedirectFields, String versionPredicate) {
-        return new InfoHolderPart(holderClass, versionPredicate, extraRedirectFields);
+    public static InfoHolderPart part(List<String> extraRedirectFields, String versionPredicate) {
+        return new InfoHolderPart(versionPredicate, extraRedirectFields);
     }
 
-    public record InfoHolderPart(String holderClassName, String versionPredicate, List<String> extraRedirectFields) {
+    public static InfoHolderPart part(String versionPredicate) {
+        return new InfoHolderPart(versionPredicate, List.of());
+    }
 
-        public String getHolderClassName() {
-            return this.holderClassName;
-        }
+    public record InfoHolderPart(String versionPredicate, List<String> extraRedirectFields) {
 
         public String getVersionPredicate() {
             return this.versionPredicate;

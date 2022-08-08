@@ -62,6 +62,6 @@ public class EarlyRiserPatcher implements Runnable {
 
         for (Map.Entry<String, InfoHolderData> entry : allInfoHolderData.entrySet())
             if (ExperimentalPerformance.CONFIG.shouldLoad(entry.getKey()))
-                entry.getValue().apply();
+                entry.getValue().apply(entry.getKey());
     }
 }

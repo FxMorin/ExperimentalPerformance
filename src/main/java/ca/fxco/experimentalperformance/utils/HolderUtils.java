@@ -56,7 +56,6 @@ public class HolderUtils {
                                                           VersionedInfoHolderData.InfoHolderPart holderPart) {
         return new InfoHolderData(
                 holderData.getTargetClassName(),
-                holderPart.holderClassName(),
                 holderPart.extraRedirectFields().size() == 0 ? holderData.getRedirectFields() : Stream.concat(
                         holderData.getRedirectFields().stream(),
                         holderPart.extraRedirectFields().stream()

@@ -13,35 +13,33 @@ import static ca.fxco.experimentalperformance.memoryDensity.HolderDataRegistry.M
 
 public class InfoHolderData {
 
+    private static final String INFOHOLDER_PATH = "ca/fxco/experimentalperformance/memoryDensity/infoHolders/";
+
     private final String targetClassName;
-    private final String holderClassName;
     private final List<String> redirectFields;
     private final String modId;
     private final String versionPredicate;
     private final boolean defaultValue;
 
-    public InfoHolderData(String targetClassName, String holderClassName, List<String> redirectFields) {
-        this(targetClassName, holderClassName, redirectFields, ALL_VERSIONS);
+    public InfoHolderData(String targetClassName, List<String> redirectFields) {
+        this(targetClassName, redirectFields, ALL_VERSIONS);
     }
 
-    public InfoHolderData(String targetClassName, String holderClassName,
-                           List<String> redirectFields, String versionPredicate) {
-        this(targetClassName, holderClassName, redirectFields, versionPredicate, MINECRAFT_ID);
+    public InfoHolderData(String targetClassName, List<String> redirectFields, String versionPredicate) {
+        this(targetClassName, redirectFields, versionPredicate, MINECRAFT_ID);
     }
 
-    public InfoHolderData(String targetClassName, String holderClassName, List<String> redirectFields,
-                          String versionPredicate, String modId) {
-        this(targetClassName, holderClassName, redirectFields, versionPredicate, modId, true);
+    public InfoHolderData(String targetClassName, List<String> redirectFields, String versionPredicate, String modId) {
+        this(targetClassName, redirectFields, versionPredicate, modId, true);
     }
 
-    public InfoHolderData(String targetClassName, String holderClassName, List<String> redirectFields,
+    public InfoHolderData(String targetClassName, List<String> redirectFields,
                           String versionPredicate, String modId, boolean defaultValue) {
         if (redirectFields.size() == 0)
             throw new IllegalArgumentException("`redirectFields` must have at least 1 field to redirect!");
         if (redirectFields.size() == 1) // Allow 1 field although it's not recommended
             ExperimentalPerformance.LOGGER.warn("`redirectFields` should have more than 1 field to redirect.");
         this.targetClassName = targetClassName;
-        this.holderClassName = holderClassName;
         this.redirectFields = redirectFields;
         this.modId = modId;
         this.versionPredicate = versionPredicate;
@@ -50,10 +48,6 @@ public class InfoHolderData {
 
     public boolean getDefaultValue() {
         return this.defaultValue;
-    }
-
-    public String getHolderClassName() {
-        return this.holderClassName;
     }
 
     public String getModId() {
@@ -69,15 +63,16 @@ public class InfoHolderData {
         return true;
     }
 
-    public void apply() {
+    public void apply(String holderId) {
         if (!shouldLoad()) return;
         ClassTinkerers.addTransformation(targetClassName, node -> {
+            String generatedHolderClassName = (INFOHOLDER_PATH + holderId + "InfoHolder").replace(".","_");
             String className = ExperimentalPerformance.VERBOSE ? GeneralUtils.getLastPathPart(targetClassName) : "";
             InfoHolderGenerator generator = new InfoHolderGenerator();
-            generator.createInfoHolder(node, holderClassName, redirectFields);
+            generator.createInfoHolder(node, generatedHolderClassName, redirectFields);
             AsmUtils.removeFieldsContaining(className, node.fields, redirectFields);
-            node.fields.add(AsmUtils.generateInfoHolderField(holderClassName));
-            AsmUtils.redirectFieldsToInfoHolder(node.methods, node.superName, targetClassName, holderClassName, redirectFields);
+            node.fields.add(AsmUtils.generateInfoHolderField(generatedHolderClassName));
+            AsmUtils.redirectFieldsToInfoHolder(node.methods, node.superName, targetClassName, generatedHolderClassName, redirectFields);
         });
     }
 
