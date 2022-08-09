@@ -51,14 +51,6 @@ public class EarlyRiserPatcher implements Runnable {
         // Here you will run all the infoHolders.
         attemptToAddHolders(allInfoHolderData, HolderDataRegistry.infoHolderDataMap); // Run built-in holder data list first
         attemptToAddVersionedHolders(allInfoHolderData, HolderDataRegistry.versionedInfoHolderDataMap);
-        // Remember that this entrypoint is an early riser!
-        FabricLoader.getInstance()
-                .getEntrypointContainers("experimentalperformance-holder", HolderDataContainer.class)
-                .forEach(entrypoint -> {
-                    HolderDataContainer container = entrypoint.getEntrypoint();
-                    attemptToAddHolders(allInfoHolderData, container.getHolderDataList());
-                    attemptToAddVersionedHolders(allInfoHolderData, container.getVersionedHolderDataList());
-                });
 
         for (Map.Entry<String, InfoHolderData> entry : allInfoHolderData.entrySet())
             if (ExperimentalPerformance.CONFIG.shouldLoad(entry.getKey()))
