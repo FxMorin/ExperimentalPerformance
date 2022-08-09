@@ -27,6 +27,9 @@ dependencies {
 
     modImplementation "com.github.Chocohead:Fabric-ASM:${project.fabric_asm_version}"
     include "com.github.Chocohead:Fabric-ASM:${project.fabric_asm_version}"
+
+    modImplementation "org.openjdk.jol:jol-core:${project.jol_version}"
+    include "org.openjdk.jol:jol-core:${project.jol_version}"
 }
 
 processResources {
