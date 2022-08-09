@@ -34,4 +34,4 @@ Unfortunately, you won't notice that cost since in most of these situations the 
   
 ### Thanks to  
 [LlamaLad7](https://github.com/LlamaLad7) - Large contribution to the ASM logic in order to make it much simpler with less overhead  
-[Fabric-ASM](https://github.com/Chocohead/Fabric-ASM) - The tool that allows me to easily nuke fields without having to crack my skull open  
+[Fabric-ASM](https://github.com/Chocohead/Fabric-ASM) - Being a great example to help me build my own mixin based ASM tools

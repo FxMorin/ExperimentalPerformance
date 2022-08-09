@@ -2,15 +2,13 @@ package ca.fxco.experimentalperformance.memoryDensity;
 
 import ca.fxco.experimentalperformance.ExperimentalPerformance;
 import ca.fxco.experimentalperformance.utils.HolderUtils;
-import net.fabricmc.loader.api.FabricLoader;
 
-import java.util.HashMap;
 import java.util.Map;
 
-public class EarlyRiserPatcher implements Runnable {
+public class HolderPatcher {
 
-    private static void attemptToAddHolders(Map<String, InfoHolderData> mainHolderMap,
-                                            Map<String, InfoHolderData> infoHolderDataMap) {
+    public static void attemptToAddHolders(Map<String, InfoHolderData> mainHolderMap,
+                                           Map<String, InfoHolderData> infoHolderDataMap) {
         for (Map.Entry<String, InfoHolderData> infoHolderDataEntry : infoHolderDataMap.entrySet()) {
             String key = infoHolderDataEntry.getKey();
             InfoHolderData infoHolderData = infoHolderDataEntry.getValue();
@@ -24,8 +22,8 @@ public class EarlyRiserPatcher implements Runnable {
         }
     }
 
-    private static void attemptToAddVersionedHolders(Map<String, InfoHolderData> mainHolderMap,
-                                                     Map<String, VersionedInfoHolderData> versionedInfoHolderDataMap) {
+    public static void attemptToAddVersionedHolders(Map<String, InfoHolderData> mainHolderMap,
+                                                    Map<String, VersionedInfoHolderData> versionedInfoHolderDataMap) {
         for (Map.Entry<String, VersionedInfoHolderData> entry : versionedInfoHolderDataMap.entrySet()) {
             String key = entry.getKey();
             VersionedInfoHolderData versionedInfoHolderData = entry.getValue();
@@ -42,18 +40,5 @@ public class EarlyRiserPatcher implements Runnable {
                 }
             }
         }
-    }
-
-    @Override
-    public void run() {
-        Map<String, InfoHolderData> allInfoHolderData = new HashMap<>();
-
-        // Here you will run all the infoHolders.
-        attemptToAddHolders(allInfoHolderData, HolderDataRegistry.infoHolderDataMap); // Run built-in holder data list first
-        attemptToAddVersionedHolders(allInfoHolderData, HolderDataRegistry.versionedInfoHolderDataMap);
-
-        for (Map.Entry<String, InfoHolderData> entry : allInfoHolderData.entrySet())
-            if (ExperimentalPerformance.CONFIG.shouldLoad(entry.getKey()))
-                entry.getValue().apply(entry.getKey());
     }
 }

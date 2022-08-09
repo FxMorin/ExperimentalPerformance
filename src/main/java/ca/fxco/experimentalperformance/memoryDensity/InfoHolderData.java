@@ -1,10 +1,10 @@
 package ca.fxco.experimentalperformance.memoryDensity;
 
 import ca.fxco.experimentalperformance.ExperimentalPerformance;
+import ca.fxco.experimentalperformance.config.TransformationManager;
 import ca.fxco.experimentalperformance.memoryDensity.infoHolders.InfoHolderGenerator;
-import ca.fxco.experimentalperformance.utils.AsmUtils;
+import ca.fxco.experimentalperformance.utils.asm.AsmUtils;
 import ca.fxco.experimentalperformance.utils.GeneralUtils;
-import com.chocohead.mm.api.ClassTinkerers;
 
 import java.util.List;
 
@@ -63,10 +63,12 @@ public class InfoHolderData {
         return true;
     }
 
-    public void apply(String holderId) {
+    // This gets called before any mixins have been applied and before any classes have been loaded!
+    public void apply(String holderId, TransformationManager transformationManager) {
         if (!shouldLoad()) return;
-        ClassTinkerers.addTransformation(targetClassName, node -> {
+        transformationManager.addPreTransformer(targetClassName, node -> {
             String generatedHolderClassName = (INFOHOLDER_PATH + holderId + "InfoHolder").replace(".","_");
+            System.out.println(generatedHolderClassName);
             String className = ExperimentalPerformance.VERBOSE ? GeneralUtils.getLastPathPart(targetClassName) : "";
             InfoHolderGenerator generator = new InfoHolderGenerator();
             generator.createInfoHolder(node, generatedHolderClassName, redirectFields);
