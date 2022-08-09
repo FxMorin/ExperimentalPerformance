@@ -1,4 +1,4 @@
-package ca.fxco.experimentalperformance.utils;
+package ca.fxco.experimentalperformance.utils.asm;
 
 import ca.fxco.experimentalperformance.ExperimentalPerformance;
 import org.objectweb.asm.*;
@@ -8,6 +8,8 @@ import org.spongepowered.asm.util.Bytecode;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+
+import static ca.fxco.experimentalperformance.utils.CommonConst.INIT;
 
 public class AsmUtils {
 
@@ -48,14 +50,14 @@ public class AsmUtils {
                 }
             }
             if (!hasInjectedInfoHolder) {
-                if (methodNode.name.equals("<cinit>") || methodNode.name.equals("<init>")) {
+                if (methodNode.name.equals("<cinit>") || methodNode.name.equals(INIT)) {
                     hasInjectedInfoHolder = true;
                     Bytecode.DelegateInitialiser delegateInit = Bytecode.findDelegateInit(methodNode, superClass, targetClass);
                     InsnList injectInfoHolder = new InsnList();
                     injectInfoHolder.add(new VarInsnNode(Opcodes.ALOAD, 0));
                     injectInfoHolder.add(new TypeInsnNode(Opcodes.NEW, holderClass));
                     injectInfoHolder.add(new InsnNode(Opcodes.DUP));
-                    injectInfoHolder.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, holderClass, "<init>", "()V"));
+                    injectInfoHolder.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, holderClass, INIT, "()V"));
                     injectInfoHolder.add(new FieldInsnNode(Opcodes.PUTFIELD, targetClass, "infoHolder", 'L' + holderClass + ';'));
                     if (delegateInit.isPresent) {
                         methodNode.instructions.insert(delegateInit.insn, injectInfoHolder);

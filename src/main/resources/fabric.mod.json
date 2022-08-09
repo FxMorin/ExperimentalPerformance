@@ -12,9 +12,6 @@
   "icon": "assets/experimentalPerformance/icon.png",
   "environment": "*",
   "entrypoints": {
-    "mm:early_risers": [
-      "ca.fxco.experimentalperformance.memoryDensity.EarlyRiserPatcher"
-    ],
     "main": [
       "ca.fxco.experimentalperformance.ExperimentalPerformance"
     ]
