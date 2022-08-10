@@ -138,6 +138,7 @@ public class TransformationManager {
         AnnotationVisitor valueAnnotation = mixinAnnotation.visitArray("value");
         valueAnnotation.visit(null, asType(targetClassName));
         valueAnnotation.visitEnd();
+        mixinAnnotation.visit("priority", 50000);
         mixinAnnotation.visitEnd();
         writer.visitEnd();
         return writer.toByteArray();
