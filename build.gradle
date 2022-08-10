@@ -27,6 +27,9 @@ dependencies {
 
     modImplementation "org.openjdk.jol:jol-core:${project.jol_version}"
     include "org.openjdk.jol:jol-core:${project.jol_version}"
+
+    modImplementation "io.github.classgraph:classgraph:${project.classgraph_version}"
+    include "io.github.classgraph:classgraph:${project.classgraph_version}"
 }
 
 processResources {
