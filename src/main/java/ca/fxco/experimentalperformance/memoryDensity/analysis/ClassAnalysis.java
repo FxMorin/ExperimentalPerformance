@@ -29,7 +29,7 @@ public class ClassAnalysis {
         if (superClazz != null && !clazz.equals(superClazz)) //Recursively build classData
             classData.addSuperClassData(createClassDataFromClass(superClazz, privateOnly));
         do {
-            for (Field field : clazz.getFields()) {
+            for (Field field : clazz.getDeclaredFields()) {
                 int modifiers = field.getModifiers();
                 if (Modifier.isStatic(modifiers)) continue;
                 if (privateOnly && !Modifier.isPrivate(modifiers)) continue;

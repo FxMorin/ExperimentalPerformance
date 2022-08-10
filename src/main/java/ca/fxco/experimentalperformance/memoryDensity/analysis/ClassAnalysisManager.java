@@ -1,6 +1,7 @@
 package ca.fxco.experimentalperformance.memoryDensity.analysis;
 
 import org.openjdk.jol.datamodel.*;
+import org.openjdk.jol.layouters.CurrentLayouter;
 import org.openjdk.jol.layouters.HotSpotLayouter;
 import org.openjdk.jol.layouters.Layouter;
 import org.openjdk.jol.layouters.RawLayouter;
@@ -16,7 +17,7 @@ public class ClassAnalysisManager {
     private final List<Future<ClassAnalysis.AnalysisResults>> futureAnalysisResults = new ArrayList<>();
 
     public ClassAnalysisManager(boolean attemptAllLayouts) {
-        this.layouts = attemptAllLayouts ? new Layouter[]{
+        this.layouts = attemptAllLayouts ? new Layouter[] {
                 new RawLayouter(new Model32()),
                 new RawLayouter(new Model64()),
                 new RawLayouter(new Model64_COOPS_CCPS()),
@@ -30,13 +31,12 @@ public class ClassAnalysisManager {
                 new HotSpotLayouter(new Model64_COOPS_CCPS(), 15),
                 new HotSpotLayouter(new Model64_CCPS(), 15),
                 new HotSpotLayouter(new Model64_CCPS(16), 15),
-        } : new Layouter[]{new RawLayouter(new ModelVM())}; // Automatically detects current model
+        } : new Layouter[]{new CurrentLayouter()}; // Automatically detects current model
     }
 
     public void runSingleAnalysis(Class<?> clazz) {
-        for (Layouter model : this.layouts) {
+        for (Layouter model : this.layouts)
             futureAnalysisResults.add(new ClassAnalysis(clazz, model).runAnalysis());
-        }
     }
 
     public void printResults() {
@@ -53,7 +53,7 @@ public class ClassAnalysisManager {
 
     public void printResults(ResultConditions conditions) {
         System.out.println("ClassAnalysisManager - Total: " + futureAnalysisResults.size());
-        int c = 0;
+        int count = 0;
         int fails = 0;
         for (Future<ClassAnalysis.AnalysisResults> task : futureAnalysisResults) {
             try {
@@ -65,13 +65,13 @@ public class ClassAnalysisManager {
                         results.getPrivateSize() <= conditions.maxPrivateSize
                 ) {
                     System.out.println(results);
-                    c++;
+                    count++;
                 }
             } catch (ExecutionException | InterruptedException e) {
                 fails++;
             }
         }
-        System.out.println("Total Shown: " + c + " - Total Fails: " + fails);
+        System.out.println("Total Shown: " + count + " - Total Fails: " + fails);
     }
 
     public void simulateResults() {
