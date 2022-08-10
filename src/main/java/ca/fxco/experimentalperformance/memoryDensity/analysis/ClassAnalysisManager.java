@@ -51,11 +51,60 @@ public class ClassAnalysisManager {
         }
     }
 
+    public void printResults(ResultConditions conditions) {
+        System.out.println("ClassAnalysisManager - Total: " + futureAnalysisResults.size());
+        int c = 0;
+        int fails = 0;
+        for (Future<ClassAnalysis.AnalysisResults> task : futureAnalysisResults) {
+            try {
+                ClassAnalysis.AnalysisResults results = task.get();
+                if (
+                        results.getSize() >= conditions.minSize &&
+                        results.getSize() <= conditions.maxSize &&
+                        results.getPrivateSize() >= conditions.minPrivateSize &&
+                        results.getPrivateSize() <= conditions.maxPrivateSize
+                ) {
+                    System.out.println(results);
+                    c++;
+                }
+            } catch (ExecutionException | InterruptedException e) {
+                fails++;
+            }
+        }
+        System.out.println("Total Shown: " + c + " - Total Fails: " + fails);
+    }
+
     public void simulateResults() {
         try {
             for (Future<ClassAnalysis.AnalysisResults> task : futureAnalysisResults) task.get();
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
+        }
+    }
+
+    public static class ResultConditions {
+        public final long minSize;
+        public final long maxSize;
+        public final long minPrivateSize;
+        public final long maxPrivateSize;
+
+        public ResultConditions(long minSize) {
+            this(minSize, Long.MAX_VALUE);
+        }
+
+        public ResultConditions(long minSize, long maxSize) {
+            this(minSize, maxSize, 0L);
+        }
+
+        public ResultConditions(long minSize, long maxSize, long minPrivateSize) {
+            this(minSize, maxSize, minPrivateSize, Long.MAX_VALUE);
+        }
+
+        public ResultConditions(long minSize, long maxSize, long minPrivateSize, long maxPrivateSize) {
+            this.minSize = minSize;
+            this.maxSize = maxSize;
+            this.minPrivateSize = minPrivateSize;
+            this.maxPrivateSize = maxPrivateSize;
         }
     }
 }

@@ -28,7 +28,7 @@ public class HolderPatcher {
             String key = entry.getKey();
             VersionedInfoHolderData versionedInfoHolderData = entry.getValue();
             VersionedInfoHolderData.InfoHolderPart infoHolderPart =
-                    HolderUtils.getBestVersionedInfoHolderPart(versionedInfoHolderData);
+                    HolderUtils.getBestInfoHolderPart(versionedInfoHolderData);
             if (infoHolderPart != null) {
                 if (mainHolderMap.containsKey(key)) { // Add more info to this later
                     ExperimentalPerformance.LOGGER.warn("Duplicate holder keys! - " + key);

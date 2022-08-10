@@ -26,7 +26,13 @@ public class AsmUtils {
     }
 
     public static FieldNode generateInfoHolderField(String holderClassName) {
-        return new FieldNode(Opcodes.ACC_PRIVATE + Opcodes.ACC_FINAL, "infoHolder", 'L' + holderClassName + ';', null, null);
+        return new FieldNode(
+                Opcodes.ACC_PRIVATE + Opcodes.ACC_FINAL,
+                "infoHolder",
+                'L' + holderClassName + ';',
+                null,
+                null
+        );
     }
 
     public static void redirectFieldsToInfoHolder(List<MethodNode> methods, String superClass, String targetClass,
@@ -52,13 +58,19 @@ public class AsmUtils {
             if (!hasInjectedInfoHolder) {
                 if (methodNode.name.equals("<cinit>") || methodNode.name.equals(INIT)) {
                     hasInjectedInfoHolder = true;
-                    Bytecode.DelegateInitialiser delegateInit = Bytecode.findDelegateInit(methodNode, superClass, targetClass);
+                    Bytecode.DelegateInitialiser delegateInit = Bytecode.findDelegateInit(
+                            methodNode,
+                            superClass,
+                            targetClass
+                    );
                     InsnList injectInfoHolder = new InsnList();
                     injectInfoHolder.add(new VarInsnNode(Opcodes.ALOAD, 0));
                     injectInfoHolder.add(new TypeInsnNode(Opcodes.NEW, holderClass));
                     injectInfoHolder.add(new InsnNode(Opcodes.DUP));
                     injectInfoHolder.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, holderClass, INIT, "()V"));
-                    injectInfoHolder.add(new FieldInsnNode(Opcodes.PUTFIELD, targetClass, "infoHolder", 'L' + holderClass + ';'));
+                    injectInfoHolder.add(new FieldInsnNode(
+                            Opcodes.PUTFIELD, targetClass, "infoHolder", 'L' + holderClass + ';')
+                    );
                     if (delegateInit.isPresent) {
                         methodNode.instructions.insert(delegateInit.insn, injectInfoHolder);
                     } else {

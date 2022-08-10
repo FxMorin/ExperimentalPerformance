@@ -41,7 +41,6 @@ public class ClassAnalysis {
     }
 
     public Future<AnalysisResults> runAnalysis() {
-        // Run JOL analysis on class and make AnalysisResults
         return CompletableFuture.supplyAsync(() -> {
             ClassLayout classLayout = layouter.layout(createClassDataFromClass(clazz, false));
             ClassLayout privateClassLayout = layouter.layout(createClassDataFromClass(clazz, true));
@@ -51,7 +50,7 @@ public class ClassAnalysis {
 
     @Override
     public String toString() {
-        return "ClassAnalysis: " + clazz.getName();
+        return clazz.getName();
     }
 
     class AnalysisResults {
@@ -96,11 +95,11 @@ public class ClassAnalysis {
         }
 
         @Override
-        public String toString() {
-            return ClassAnalysis.this +
-                    " - Size: " + (getSize() - getHeaderSize()) +
+        public String toString() { //TODO: Change this once private size is fixed
+            return String.format("Size: %4d - %s", (getSize() - getHeaderSize()), ClassAnalysis.this);
+            /*return "Size: " + (getSize() - getHeaderSize()) +
                     " - PrivateSize: " + (getPrivateSize() - getPrivateHeaderSize()) +
-                    " - canOptimize: " + canOptimize;
+                    " - canOptimize: " + canOptimize + ClassAnalysis.this;*/
         }
     }
 }

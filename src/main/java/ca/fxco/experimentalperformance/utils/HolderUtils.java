@@ -33,7 +33,7 @@ public class HolderUtils {
     }
 
     @Nullable
-    public static VersionedInfoHolderData.InfoHolderPart getBestVersionedInfoHolderPart(VersionedInfoHolderData holderData) {
+    public static VersionedInfoHolderData.InfoHolderPart getBestInfoHolderPart(VersionedInfoHolderData holderData) {
         String modId = holderData.getModId();
         if (!FabricLoader.getInstance().isModLoaded(modId)) return null;
         List<VersionedInfoHolderData.InfoHolderPart> holderParts = holderData.getVersionedInfoHolderParts();

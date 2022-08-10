@@ -28,7 +28,9 @@ public class InfoHolderGenerator {
             for (String fieldName : redirectFields) {
                 for (FieldNode fieldNode : targetClassNode.fields) {
                     if (fieldNode.name.equals(fieldName)) {
-                        cw.visitField(Opcodes.ACC_PUBLIC, fieldName, fieldNode.desc, fieldNode.signature, fieldNode.value).visitEnd();
+                        cw.visitField(
+                                Opcodes.ACC_PUBLIC, fieldName, fieldNode.desc, fieldNode.signature, fieldNode.value
+                        ).visitEnd();
                         break;
                     }
                 }

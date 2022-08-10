@@ -13,6 +13,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
+import static ca.fxco.experimentalperformance.memoryDensity.HolderDataRegistry.infoHolderDataMap;
+import static ca.fxco.experimentalperformance.memoryDensity.HolderDataRegistry.versionedInfoHolderDataMap;
+
 /**
     This config clears all its information once it's done loading
  */
@@ -82,11 +85,11 @@ public class SimpleConfig {
             writer.write("# Use this config to change what options should be enabled or disabled\n");
             writer.write("#\n");
             writer.write("# The default value will be placed here when writing the config for the first time\n\n");
-            for (Map.Entry<String, InfoHolderData> entry : HolderDataRegistry.infoHolderDataMap.entrySet()) {
+            for (Map.Entry<String, InfoHolderData> entry : infoHolderDataMap.entrySet()) {
                 writer.write(entry.getKey() + "=" + entry.getValue().getDefaultValue() + "\n");
                 if (entry.getValue().getDefaultValue()) this.validHolders.add(entry.getKey());
             }
-            for (Map.Entry<String, VersionedInfoHolderData> entry : HolderDataRegistry.versionedInfoHolderDataMap.entrySet()) {
+            for (Map.Entry<String, VersionedInfoHolderData> entry : versionedInfoHolderDataMap.entrySet()) {
                 writer.write(entry.getKey() + "=" + entry.getValue().getDefaultValue() + "\n");
                 if (entry.getValue().getDefaultValue()) this.validHolders.add(entry.getKey());
             }
