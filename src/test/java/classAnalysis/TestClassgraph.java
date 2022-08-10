@@ -9,12 +9,15 @@ import java.util.List;
 
 public class TestClassgraph {
 
-    private static final ClassAnalysisManager classAnalysisManager = new ClassAnalysisManager(true);
+    private static final ClassAnalysisManager classAnalysisManager = new ClassAnalysisManager(false);
 
     public static void main(String[] args) {
-        try (ScanResult scanResult = new ClassGraph().enableAllInfo().acceptPackages("net.minecraft").scan()) {
+        try (ScanResult scanResult = new ClassGraph()
+                .enableAllInfo()
+                .ignoreClassVisibility()
+                .acceptPackages("net.minecraft")
+                .scan()) {
             ClassInfoList allClassInfo = scanResult.getAllClasses();
-            //List<String> allClassesNames = allClasses.getNames(); // Get all class names
             List<Class<?>> allClasses = allClassInfo.loadClasses(); // Load all classes
             for (Class<?> clazz : allClasses)
                 classAnalysisManager.runSingleAnalysis(clazz);
