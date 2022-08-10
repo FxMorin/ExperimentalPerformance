@@ -66,7 +66,7 @@ public class InfoHolderData {
     // This gets called before any mixins have been applied and before any classes have been loaded!
     public void apply(String holderId, TransformationManager transformationManager) {
         if (!shouldLoad()) return;
-        transformationManager.addPreTransformer(targetClassName, node -> {
+        transformationManager.addPostTransformer(targetClassName, node -> {
             String generatedHolderClassName = (INFOHOLDER_PATH + holderId + "InfoHolder").replace(".","_");
             System.out.println(generatedHolderClassName);
             String className = ExperimentalPerformance.VERBOSE ? GeneralUtils.getLastPathPart(targetClassName) : "";
