@@ -76,7 +76,7 @@ jar {
     manifest(({
         attributes(
                 "Manifest-Version": "1.0",
-                "ca.fxco.experimentalperformance.memoryDensity.mixinHacks.InstrumentationAgent",
+                "Agent-Class": "ca.fxco.experimentalperformance.memoryDensity.mixinHacks.InstrumentationAgent",
                 "Can-Retransform-Classes": "true",
                 "Can-Redefine-Classes": "true"
         )
