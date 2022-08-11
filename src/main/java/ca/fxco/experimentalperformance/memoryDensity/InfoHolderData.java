@@ -1,12 +1,13 @@
 package ca.fxco.experimentalperformance.memoryDensity;
 
 import ca.fxco.experimentalperformance.ExperimentalPerformance;
-import ca.fxco.experimentalperformance.config.TransformationManager;
 import ca.fxco.experimentalperformance.memoryDensity.infoHolders.InfoHolderGenerator;
 import ca.fxco.experimentalperformance.utils.asm.AsmUtils;
 import ca.fxco.experimentalperformance.utils.GeneralUtils;
+import org.objectweb.asm.tree.ClassNode;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 import static ca.fxco.experimentalperformance.memoryDensity.HolderDataRegistry.ALL_VERSIONS;
 import static ca.fxco.experimentalperformance.memoryDensity.HolderDataRegistry.MINECRAFT_ID;
@@ -64,9 +65,13 @@ public class InfoHolderData {
     }
 
     // This gets called before any mixins have been applied and before any classes have been loaded!
-    public void apply(String holderId, TransformationManager transformationManager) {
+    /*public void apply(String holderId, TransformationManager transformationManager) {
         if (!shouldLoad()) return;
-        transformationManager.addPostTransformer(targetClassName, node -> {
+        //transformationManager.addPostTransformer(targetClassName, runTransformation(holderId));
+    }*/
+
+    public Consumer<ClassNode> runTransformation(String holderId) {
+        return node -> {
             String generatedHolderClassName = (INFOHOLDER_PATH + holderId + "InfoHolder").replace(".","_");
             System.out.println(generatedHolderClassName);
             String className = ExperimentalPerformance.VERBOSE ? GeneralUtils.getLastPathPart(targetClassName) : "";
@@ -77,7 +82,7 @@ public class InfoHolderData {
             AsmUtils.redirectFieldsToInfoHolder(
                     node.methods, node.superName, targetClassName, generatedHolderClassName, redirectFields
             );
-        });
+        };
     }
 
     //May want to setup a builder if I add any more options

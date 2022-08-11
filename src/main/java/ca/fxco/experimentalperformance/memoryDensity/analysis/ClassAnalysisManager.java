@@ -1,5 +1,8 @@
 package ca.fxco.experimentalperformance.memoryDensity.analysis;
 
+import io.github.classgraph.ClassGraph;
+import io.github.classgraph.ClassInfoList;
+import io.github.classgraph.ScanResult;
 import org.openjdk.jol.datamodel.*;
 import org.openjdk.jol.layouters.CurrentLayouter;
 import org.openjdk.jol.layouters.HotSpotLayouter;
@@ -37,6 +40,19 @@ public class ClassAnalysisManager {
     public void runSingleAnalysis(Class<?> clazz) {
         for (Layouter model : this.layouts)
             futureAnalysisResults.add(new ClassAnalysis(clazz, model).runAnalysis());
+    }
+
+    public void runAllMcClasses() {
+        try (ScanResult scanResult = new ClassGraph()
+                .enableAllInfo()
+                .ignoreClassVisibility()
+                .acceptPackages("net.minecraft")
+                .scan()) {
+            ClassInfoList allClassInfo = scanResult.getAllClasses();
+            List<Class<?>> allClasses = allClassInfo.loadClasses(); // Load all classes
+            for (Class<?> clazz : allClasses)
+                runSingleAnalysis(clazz);
+        }
     }
 
     public void printResults() {
@@ -80,6 +96,36 @@ public class ClassAnalysisManager {
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
+    }
+
+    public List<ClassAnalysis.AnalysisResults> getResults() {
+        List<ClassAnalysis.AnalysisResults> list = new ArrayList<>();
+        for (Future<ClassAnalysis.AnalysisResults> task : futureAnalysisResults)
+            try {
+                list.add(task.get());
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            }
+        return list;
+    }
+
+    public List<ClassAnalysis.AnalysisResults> getResults(ResultConditions conditions) {
+        List<ClassAnalysis.AnalysisResults> list = new ArrayList<>();
+        for (Future<ClassAnalysis.AnalysisResults> task : futureAnalysisResults)
+            try {
+                ClassAnalysis.AnalysisResults results = task.get();
+                if (
+                        results.getSize() >= conditions.minSize &&
+                        results.getSize() <= conditions.maxSize &&
+                        results.getPrivateSize() >= conditions.minPrivateSize &&
+                        results.getPrivateSize() <= conditions.maxPrivateSize
+                ) {
+                    list.add(results);
+                }
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            }
+        return list;
     }
 
     public static class ResultConditions {

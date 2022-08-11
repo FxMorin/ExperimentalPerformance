@@ -7,5 +7,11 @@
   "mixins": [],
   "injectors": {
     "defaultRequire": 1
-  }
+  },
+  "client": [
+    "memoryDensity.Main_clientLoadedMixin"
+  ],
+  "server": [
+    "memoryDensity.MinecraftServer_loadWorldMixin"
+  ]
 }

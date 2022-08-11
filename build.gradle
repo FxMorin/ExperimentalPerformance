@@ -8,14 +8,18 @@ version = project.mod_version
 group = project.maven_group
 
 repositories {
+    mavenCentral()
     maven {
         name = 'Fabric'
         url = 'https://maven.fabricmc.net/'
     }
-    mavenCentral()
     maven {
         name = 'Jitpack'
         url 'https://jitpack.io/'
+    }
+    maven {
+        name = 'auoeke'
+        url = 'https://maven.auoeke.net'
     }
 }
 
@@ -25,11 +29,17 @@ dependencies {
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
+    modImplementation "net.gudenau.lib:unsafe:${project.unsafe_version}"
+    include "net.gudenau.lib:unsafe:${project.unsafe_version}"
+
     modImplementation "org.openjdk.jol:jol-core:${project.jol_version}"
     include "org.openjdk.jol:jol-core:${project.jol_version}"
 
     modImplementation "io.github.classgraph:classgraph:${project.classgraph_version}"
     include "io.github.classgraph:classgraph:${project.classgraph_version}"
+
+    modImplementation "net.bytebuddy:byte-buddy-agent:${project.byte_buddy_version}"
+    include "net.bytebuddy:byte-buddy-agent:${project.byte_buddy_version}"
 }
 
 processResources {
@@ -62,6 +72,15 @@ jar {
     from("LICENSE") {
         rename { "${it}_${project.archivesBaseName}" }
     }
+
+    manifest(({
+        attributes(
+                "Manifest-Version": "1.0",
+                "ca.fxco.experimentalperformance.memoryDensity.mixinHacks.InstrumentationAgent",
+                "Can-Retransform-Classes": "true",
+                "Can-Redefine-Classes": "true"
+        )
+    } as groovy.lang.Closure<?>))
 }
 
 // configure the maven publication

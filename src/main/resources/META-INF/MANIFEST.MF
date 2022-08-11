@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Agent-Class: ca.fxco.experimentalperformance.memoryDensity.mixinHacks.InstrumentationAgent
+Can-Retransform-Classes: true
+Can-Redefine-Classes: true

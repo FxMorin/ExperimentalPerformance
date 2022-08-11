@@ -12,12 +12,12 @@ import java.util.*;
 
 public class SimpleConfigMixinPlugin implements IMixinConfigPlugin {
 
-    private static TransformationManager transformationManager;
+    //private static TransformationManager transformationManager;
 
     @Override
     public void onLoad(String mixinPackage) {
-        transformationManager = new TransformationManager(mixinPackage);
-        ExperimentalPerformance.CONFIG.parseConfig();
+        //transformationManager = new TransformationManager(mixinPackage);
+        /*ExperimentalPerformance.CONFIG.parseConfig();
         Map<String, InfoHolderData> allInfoHolderData = new HashMap<>();
 
         // Here you will run all the infoHolders. - Run built-in holder data list first
@@ -26,8 +26,8 @@ public class SimpleConfigMixinPlugin implements IMixinConfigPlugin {
 
         for (Map.Entry<String, InfoHolderData> entry : allInfoHolderData.entrySet())
             if (ExperimentalPerformance.CONFIG.shouldLoad(entry.getKey()))
-                entry.getValue().apply(entry.getKey(), transformationManager);
-        transformationManager.onLoad();
+                entry.getValue().apply(entry.getKey(), transformationManager);*/
+        //transformationManager.onLoad();
     }
 
     @Override
@@ -45,16 +45,17 @@ public class SimpleConfigMixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public List<String> getMixins() {
-        return transformationManager.onGetMixins();
+        return null;//transformationManager.onGetMixins();
     }
 
     @Override
     public void preApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
-        transformationManager.onPreApply(targetClassName, targetClass, mixinClassName);
+        //transformationManager.onPreApply(targetClassName, targetClass, mixinClassName);
     }
 
     @Override
     public void postApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
-        transformationManager.onPostApply(targetClassName, targetClass, mixinClassName);
+        //transformationManager.onPostApply(targetClassName, targetClass, mixinClassName);
+        //ExperimentalPerformance.fieldReferenceAnalysis.scanClass(targetClassName, targetClass);
     }
 }

@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.openjdk.jol.info.ClassData;
 import org.openjdk.jol.info.ClassLayout;
 import org.openjdk.jol.info.FieldData;
+import org.openjdk.jol.info.FieldLayout;
 import org.openjdk.jol.layouters.Layouter;
 
 import java.lang.reflect.Field;
@@ -44,7 +45,7 @@ public class ClassAnalysis {
         return CompletableFuture.supplyAsync(() -> {
             ClassLayout classLayout = layouter.layout(createClassDataFromClass(clazz, false));
             ClassLayout privateClassLayout = layouter.layout(createClassDataFromClass(clazz, true));
-            return new AnalysisResults(classLayout, privateClassLayout);
+            return new AnalysisResults(clazz.getName(), classLayout, privateClassLayout);
         });
     }
 
@@ -53,17 +54,23 @@ public class ClassAnalysis {
         return clazz.getName();
     }
 
-    class AnalysisResults {
+    public class AnalysisResults {
 
+        private final String className;
         private final ClassLayout classLayout;
         private final ClassLayout privateClassLayout;
         private final boolean canOptimize;
 
-        public AnalysisResults(final ClassLayout classLayout, final ClassLayout privateClassLayout) {
+        public AnalysisResults(String className, final ClassLayout classLayout, final ClassLayout privateClassLayout) {
+            this.className = className;
             this.classLayout = classLayout;
             this.privateClassLayout = privateClassLayout;
             long totalSize = classLayout.instanceSize();
             this.canOptimize = totalSize > 64 && (privateClassLayout.instanceSize() >= totalSize % 64);
+        }
+
+        public String getClassName() {
+            return this.className;
         }
 
         public long getSize() {
