@@ -1,5 +1,6 @@
 package ca.fxco.experimentalperformance.memoryDensity.analysis;
 
+import org.objectweb.asm.tree.ClassNode;
 import org.openjdk.jol.datamodel.*;
 import org.openjdk.jol.layouters.CurrentLayouter;
 import org.openjdk.jol.layouters.HotSpotLayouter;
@@ -8,41 +9,72 @@ import org.openjdk.jol.layouters.RawLayouter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.function.Consumer;
 
 public class ClassAnalysisManager {
 
-    private final Layouter[] layouts;
+    private final Layouter currentLayout = new CurrentLayouter();
     private final List<Future<ClassAnalysis.AnalysisResults>> futureAnalysisResults = new ArrayList<>();
 
-    public ClassAnalysisManager(boolean attemptAllLayouts) {
-        this.layouts = attemptAllLayouts ? new Layouter[] {
-                new RawLayouter(new Model32()),
-                new RawLayouter(new Model64()),
-                new RawLayouter(new Model64_COOPS_CCPS()),
-                new HotSpotLayouter(new Model32(), 8),
-                new HotSpotLayouter(new Model64(), 8),
-                new HotSpotLayouter(new Model64_COOPS_CCPS(), 8),
-                new HotSpotLayouter(new Model64_COOPS_CCPS(16), 8),
-                new HotSpotLayouter(new Model32(), 15),
-                new HotSpotLayouter(new Model64(), 15),
-                new HotSpotLayouter(new Model64_CCPS(), 15),
-                new HotSpotLayouter(new Model64_COOPS_CCPS(), 15),
-                new HotSpotLayouter(new Model64_CCPS(), 15),
-                new HotSpotLayouter(new Model64_CCPS(16), 15),
-        } : new Layouter[]{new CurrentLayouter()}; // Automatically detects current model
+    public ClassAnalysisManager() {}
+
+    public Layouter getCurrentLayouter() {
+        return this.currentLayout;
     }
 
-    public void runSingleAnalysis(Class<?> clazz) {
-        for (Layouter model : this.layouts)
-            futureAnalysisResults.add(new ClassAnalysis(clazz, model).runAnalysis());
+    public void runSingleAnalysis(Class<?> clazz, Set<String> validFields) {
+        this.futureAnalysisResults.add(new ClassAnalysis(clazz.getName(), currentLayout)
+                .runAnalysis(clazz, validFields));
+    }
+
+    public void runSingleAnalysis(ClassNode classNode, Set<String> validFields) {
+        this.futureAnalysisResults.add(new ClassAnalysis(classNode.name, currentLayout)
+                .runAnalysis(classNode, validFields));
+    }
+
+    public void runBulkClassAnalysis(List<Class<?>> clazzes) {
+        for (Class<?> clazz : clazzes)
+            runSingleAnalysis(clazz, null);
+    }
+
+    public void runBulkClassNodeAnalysis(List<ClassNode> classNodes) {
+        for (ClassNode classNode : classNodes)
+            runSingleAnalysis(classNode, null);
+    }
+
+    public void runBulkClassAnalysis(List<Class<?>> clazzes, FieldReferenceAnalysis fieldReferenceAnalysis) {
+        for (Class<?> clazz : clazzes)
+            runSingleAnalysis(clazz, fieldReferenceAnalysis.getFieldsForClass(clazz.getName()));
+    }
+
+    public void runBulkClassNodeAnalysis(Map<String, ClassNode> classNodes, FieldReferenceAnalysis fieldReferenceAnalysis) {
+        for (ClassNode classNode : classNodes.values())
+            runSingleAnalysis(classNode, fieldReferenceAnalysis.getFieldsForClass(classNode.name));
+    }
+
+    public void clear() {
+        this.futureAnalysisResults.clear();
+    }
+
+    public void forEach(Consumer<ClassAnalysis.AnalysisResults> resultsConsumer) {
+        this.futureAnalysisResults.forEach(futureResult -> {
+            try {
+                resultsConsumer.accept(futureResult.get());
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     public void printResults() {
         try {
-            System.out.println("ClassAnalysisManager - Total: " + futureAnalysisResults.size());
-            for (Future<ClassAnalysis.AnalysisResults> task : futureAnalysisResults) {
+            System.out.println("ClassAnalysisManager - Total: " + this.futureAnalysisResults.size());
+            for (Future<ClassAnalysis.AnalysisResults> task : this.futureAnalysisResults) {
                 ClassAnalysis.AnalysisResults analysisResults = task.get();
                 System.out.println(analysisResults.toString());
             }
@@ -52,10 +84,10 @@ public class ClassAnalysisManager {
     }
 
     public void printResults(ResultConditions conditions) {
-        System.out.println("ClassAnalysisManager - Total: " + futureAnalysisResults.size());
+        System.out.println("ClassAnalysisManager - Total: " + this.futureAnalysisResults.size());
         int count = 0;
         int fails = 0;
-        for (Future<ClassAnalysis.AnalysisResults> task : futureAnalysisResults) {
+        for (Future<ClassAnalysis.AnalysisResults> task : this.futureAnalysisResults) {
             try {
                 ClassAnalysis.AnalysisResults results = task.get();
                 if (
@@ -76,7 +108,7 @@ public class ClassAnalysisManager {
 
     public void simulateResults() {
         try {
-            for (Future<ClassAnalysis.AnalysisResults> task : futureAnalysisResults) task.get();
+            for (Future<ClassAnalysis.AnalysisResults> task : this.futureAnalysisResults) task.get();
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }

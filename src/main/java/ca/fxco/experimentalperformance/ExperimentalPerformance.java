@@ -1,6 +1,7 @@
 package ca.fxco.experimentalperformance;
 
 import ca.fxco.experimentalperformance.config.SimpleConfig;
+import ca.fxco.experimentalperformance.memoryDensity.analysis.FieldReferenceAnalysis;
 import net.fabricmc.api.ModInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,10 +20,16 @@ public class ExperimentalPerformance implements ModInitializer {
     public static final String MODID = "experimentalperformance";
     public static final Logger LOGGER = LoggerFactory.getLogger(MODID);
 
+    public static final ClassLoader KNOT_CLASS_LOADER;
+
     public static final SimpleConfig CONFIG = new SimpleConfig();
 
     public static final boolean VERBOSE = true;
 
     @Override
     public void onInitialize() {}
+
+    static {
+        KNOT_CLASS_LOADER = ExperimentalPerformance.class.getClassLoader();
+    }
 }

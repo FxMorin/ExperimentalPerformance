@@ -13,6 +13,13 @@ import static ca.fxco.experimentalperformance.utils.CommonConst.INIT;
 
 public class AsmUtils {
 
+    public static ClassNode getClassNodeFromBytecode(byte[] data) {
+        ClassReader reader = new ClassReader(data);
+        ClassNode node = new ClassNode();
+        reader.accept(node, 0);
+        return node;
+    }
+
     public static void removeFieldsContaining(String className, List<FieldNode> fields, List<String> removeFields) {
         final Iterator<FieldNode> each = fields.iterator();
         while (each.hasNext()) {

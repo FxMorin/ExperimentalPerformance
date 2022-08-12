@@ -1,5 +1,6 @@
 package ca.fxco.experimentalperformance.memoryDensity;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -63,10 +64,10 @@ public class HolderDataRegistry {
     );
 
 
-    public static final Map<String, InfoHolderData> infoHolderDataMap = Map.of(
-            ep("Block"), infoHolder_Block,
-            ep("EntityExtreme"), infoHolder_EntityExtreme
-    );
+    public static final Map<String, InfoHolderData> infoHolderDataMap = new HashMap<>() {{
+        put(ep("Block"), infoHolder_Block);
+        put(ep("EntityExtreme"), infoHolder_EntityExtreme);
+    }};
 
     public static final Map<String, VersionedInfoHolderData> versionedInfoHolderDataMap = Map.of(
             ep("Chunk"), infoHolder_Chunk,

@@ -1,35 +1,46 @@
 package ca.fxco.experimentalperformance.memoryDensity.analysis;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.FieldNode;
 import org.openjdk.jol.info.ClassData;
 import org.openjdk.jol.info.ClassLayout;
 import org.openjdk.jol.info.FieldData;
+import org.openjdk.jol.layouters.CurrentLayouter;
 import org.openjdk.jol.layouters.Layouter;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
 public class ClassAnalysis {
 
-    private final Class<?> clazz;
+    private final String className;
     private final Layouter layouter;
 
+    public ClassAnalysis(String className) {
+        this(className, new CurrentLayouter());
+    }
 
-    public ClassAnalysis(Class<?> clazz, Layouter layouter) {
-        this.clazz = clazz;
+    public ClassAnalysis(String className, Layouter layouter) {
+        this.className = className;
         this.layouter = layouter;
     }
 
-    private static ClassData createClassDataFromClass(@NotNull Class<?> clazz, boolean privateOnly) {
+    private static ClassData createClassData(@NotNull Class<?> clazz, boolean privateOnly, Set<String> validFields) {
         String clazzName = clazz.getName();
         ClassData classData = new ClassData(clazzName);
         Class<?> superClazz = clazz.getSuperclass();
         if (superClazz != null && !clazz.equals(superClazz)) //Recursively build classData
-            classData.addSuperClassData(createClassDataFromClass(superClazz, privateOnly));
+            classData.addSuperClassData(createClassData(superClazz, privateOnly, validFields));
         do {
             for (Field field : clazz.getDeclaredFields()) {
+                if (validFields != null && validFields.contains(field.getName())) continue;
                 int modifiers = field.getModifiers();
                 if (Modifier.isStatic(modifiers)) continue;
                 if (privateOnly && !Modifier.isPrivate(modifiers)) continue;
@@ -40,17 +51,32 @@ public class ClassAnalysis {
         return classData;
     }
 
-    public Future<AnalysisResults> runAnalysis() {
+    private static ClassData createClassData(@NotNull ClassNode classNode, boolean privateOnly, Set<String> validFields) {
+        String className = classNode.name;
+        ClassData classData = new ClassData(className);
+        for (FieldNode field : classNode.fields) {
+            if (validFields != null && validFields.contains(field.name)) continue;
+            if ((field.access & Opcodes.ACC_STATIC) != 0) continue; // If isStatic
+            if (privateOnly && (field.access & Opcodes.ACC_PRIVATE) == 0) continue; // If not private and privateOnly
+            classData.addField(FieldData.create(className, field.name, Type.getType(field.desc).getClassName()));
+        }
+        return classData;
+    }
+
+    public Future<AnalysisResults> runAnalysis(Class<?> clazz, @Nullable Set<String> validFields) {
         return CompletableFuture.supplyAsync(() -> {
-            ClassLayout classLayout = layouter.layout(createClassDataFromClass(clazz, false));
-            ClassLayout privateClassLayout = layouter.layout(createClassDataFromClass(clazz, true));
+            ClassLayout classLayout = layouter.layout(createClassData(clazz, false, validFields));
+            ClassLayout privateClassLayout = layouter.layout(createClassData(clazz, true, validFields));
             return new AnalysisResults(classLayout, privateClassLayout);
         });
     }
 
-    @Override
-    public String toString() {
-        return clazz.getName();
+    public Future<AnalysisResults> runAnalysis(ClassNode classNode, @Nullable Set<String> validFields) {
+        return CompletableFuture.supplyAsync(() -> {
+            ClassLayout classLayout = layouter.layout(createClassData(classNode, false, validFields));
+            ClassLayout privateClassLayout = layouter.layout(createClassData(classNode, true, validFields));
+            return new AnalysisResults(classLayout, privateClassLayout);
+        });
     }
 
     class AnalysisResults {
@@ -92,6 +118,10 @@ public class ClassAnalysis {
 
         public boolean canOptimize() {
             return this.canOptimize;
+        }
+
+        public String getClassName() {
+            return ClassAnalysis.this.className;
         }
 
         @Override
