@@ -3,18 +3,13 @@ package ca.fxco.experimentalperformance.memoryDensity.analysis;
 import ca.fxco.experimentalperformance.ExperimentalPerformance;
 import ca.fxco.experimentalperformance.memoryDensity.HolderDataRegistry;
 import ca.fxco.experimentalperformance.memoryDensity.InfoHolderData;
-import ca.fxco.experimentalperformance.memoryDensity.mixinHacks.HacktasticClassLoader;
 import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
-import org.openjdk.jol.info.ClassData;
-import org.openjdk.jol.info.ClassLayout;
-import org.openjdk.jol.info.FieldData;
+import org.openjdk.jol.util.MathUtil;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static ca.fxco.experimentalperformance.utils.GeneralUtils.formatPathDot;
 import static ca.fxco.experimentalperformance.utils.GeneralUtils.getLastPathPart;
 import static org.lwjgl.system.MemoryUtil.CACHE_LINE_SIZE;
 
@@ -23,15 +18,15 @@ public class FieldReferenceAnalysis {
     private static final String MINECRAFT_PACKAGE = "net/minecraft";
 
     private final HashMap<String, HashMap<String, AtomicInteger>> fieldRefCounter = new HashMap<>();
-    private final HashMap<String, HashMap<Integer, FieldData>> fieldRefData = new HashMap<>();
+    private final HashMap<String, HashMap<Integer, FieldNode>> fieldRefData = new HashMap<>();
 
     public FieldReferenceAnalysis() {}
 
     public Set<String> getFieldsForClass(String className) {
         if (this.fieldRefData.containsKey(className)) {
             Set<String> fieldNames = new HashSet<>();
-            for (Map.Entry<Integer, FieldData> fieldData : this.fieldRefData.get(className).entrySet())
-                fieldNames.add(fieldData.getValue().name());
+            for (Map.Entry<Integer, FieldNode> fieldData : this.fieldRefData.get(className).entrySet())
+                fieldNames.add(fieldData.getValue().name);
             return fieldNames;
         }
         return Set.of();
@@ -40,7 +35,7 @@ public class FieldReferenceAnalysis {
     public void generateInfoHolderData(ClassAnalysisManager classAnalysisManager) {
         ExperimentalPerformance.LOGGER.info("Amt AnalysisResults: " + classAnalysisManager.resultAmt());
         classAnalysisManager.forEach(analysisResults -> {
-            String className = analysisResults.getClassName();
+            String className = analysisResults.className;
             //ExperimentalPerformance.LOGGER.info(className);
             if (this.fieldRefData.containsKey(className)) {
                 InfoHolderData infoHolderData = generateHolder(classAnalysisManager, analysisResults, className);
@@ -55,33 +50,27 @@ public class FieldReferenceAnalysis {
     }
 
     private InfoHolderData generateHolder(ClassAnalysisManager classAnalysisManager,
-                                          ClassAnalysis.AnalysisResults analysisResults, String className) {
+                                          ClassAnalysisManager.AnalysisResult analysisResults, String className) {
         ExperimentalPerformance.LOGGER.info("Generate Holder for: " + className);
-        long amountOver = analysisResults.getSize() % CACHE_LINE_SIZE;
-        if (amountOver > (CACHE_LINE_SIZE - analysisResults.getHeaderSize())) return null;
-        List<Map.Entry<Integer, FieldData>> fields = new LinkedList<>(this.fieldRefData.get(className).entrySet());
+        long amountOver = analysisResults.instanceSize % CACHE_LINE_SIZE;
+        if (amountOver > (CACHE_LINE_SIZE - ClassNodeInstanceSizeCalculator.OBJECT_HEADER_SIZE)) return null;
+        List<Map.Entry<Integer, FieldNode>> fields = new LinkedList<>(this.fieldRefData.get(className).entrySet());
         // Choose fields to use (lowest to highest references)
         fields.sort(new Comparator<>() {
-            public int compare(Map.Entry<Integer, FieldData> o1, Map.Entry<Integer, FieldData> o2) {
+            public int compare(Map.Entry<Integer, FieldNode> o1, Map.Entry<Integer, FieldNode> o2) {
                 return o1.getKey().compareTo(o2.getKey());
             }
         });
-        ExperimentalPerformance.LOGGER.info("Fields to remove: " + fields.size());
         // Attempt to grow the holder class until you removed enough so its under the cache line
         Set<String> fieldNames = new HashSet<>();
-        ClassData testClassData = new ClassData(className);
-        int count = 0;
-        for (Map.Entry<Integer, FieldData> field : fields) {
-            testClassData.addField(field.getValue());
-            count++;
-            if (count > 2) { // Start checking after 2 fields
-                ClassLayout classLayout = classAnalysisManager.getCurrentLayouter().layout(testClassData);
-                if (classLayout.instanceSize() > amountOver) // Stop if holder is larger than CACHE_LINE_SIZE
-                    break;
-            }
-            fieldNames.add(field.getValue().name());
+        long instanceSize = ClassNodeInstanceSizeCalculator.OBJECT_HEADER_SIZE;
+        for (Map.Entry<Integer, FieldNode> field : fields) {
+            instanceSize += ClassNodeInstanceSizeCalculator.calculateFieldCost(field.getValue());
+            if (MathUtil.align(instanceSize, ClassNodeInstanceSizeCalculator.OBJECT_ALIGNMENT) > amountOver)
+                break; // Stop if holder is larger than CACHE_LINE_SIZE
+            fieldNames.add(field.getValue().name);
         }
-        ExperimentalPerformance.LOGGER.info("Fields names: " + fieldNames);
+        ExperimentalPerformance.LOGGER.info("Fields names: " + fieldNames + " with holder size: " + instanceSize);
         // Pack and ship
         return new InfoHolderData(className, new ArrayList<>(fieldNames));
     }
@@ -117,29 +106,21 @@ public class FieldReferenceAnalysis {
     }
 
     // This method will remove all public and static fields from the analysis
-    public void processFieldData(Map<String, ClassNode> classNodes, Map<String, byte[]> classBytes) {
+    public void processFieldData(Map<String, ClassNode> classNodes) {
         for (Map.Entry<String, HashMap<String, AtomicInteger>> entry : this.fieldRefCounter.entrySet()) {
             String className = entry.getKey();
             ClassNode classNode = classNodes.get(className);
             if (classNode == null) continue;
             ExperimentalPerformance.LOGGER.info(classNode.name);
 
-            // Get class without loading it with the normal classLoaders
-            HacktasticClassLoader hackyClassLoader = new HacktasticClassLoader();
-            Class clazz = hackyClassLoader.defineClass(className, classBytes.get(formatPathDot(entry.getKey())));
-
+            HashMap<Integer, FieldNode> fields = this.fieldRefData.computeIfAbsent(className, c -> new HashMap<>());
             for (FieldNode fieldNode : classNode.fields) {
                 if ((fieldNode.access & Opcodes.ACC_STATIC) != 0) continue; // If isStatic
                 if ((fieldNode.access & Opcodes.ACC_PRIVATE) == 0) continue; // If not private
                 //ExperimentalPerformance.LOGGER.info(className + "|" + fieldNode.name);
                 AtomicInteger integer = entry.getValue().get(fieldNode.name);
                 if (integer == null) continue; // Was removed for being too hot
-                HashMap<Integer, FieldData> fields = this.fieldRefData.computeIfAbsent(className, c -> new HashMap<>());
-                try { // Remove all fields that don't fit the data
-                    fields.put(integer.get(), FieldData.parse(clazz.getDeclaredField(fieldNode.name)));
-                } catch (NoSuchFieldException e) {
-                    e.printStackTrace();
-                }
+                fields.put(integer.get(), fieldNode);
             }
         }
         this.fieldRefCounter.clear();

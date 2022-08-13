@@ -36,9 +36,12 @@ public class PreLoadMixins {
         }
         ExperimentalPerformance.LOGGER.info("Identify & Remove HOT fields, they make everyone else look bad!");
         this.fieldReferenceAnalysis.processHotFields();
-        this.fieldReferenceAnalysis.processFieldData(classNodes, classBytes);
+        this.fieldReferenceAnalysis.processFieldData(classNodes);
         // Pass fieldReferenceAnalysis in order to remove the hot fields from the private field analysis
-        this.classAnalysisManager.runBulkClassNodeAnalysis(classNodes, classBytes, this.fieldReferenceAnalysis);
+        this.classAnalysisManager.runBulkClassNodeAnalysis(
+                new ArrayList<>(classNodes.values()),
+                this.fieldReferenceAnalysis
+        );
         // Pass classAnalysisManager in order to get the field sizes and also to scan newly created holders
         this.fieldReferenceAnalysis.generateInfoHolderData(this.classAnalysisManager);
     }
@@ -92,27 +95,4 @@ public class PreLoadMixins {
             throw new RuntimeException("Unable to generate classBytes", e);
         }
     }
-
-    /*public static void forceApplyAllMixins() {
-        try {
-            MixinEnvironment currentEnvironment = MixinEnvironment.getCurrentEnvironment();
-            Object currentTransformer = currentEnvironment.getActiveTransformer();
-
-            Method transformClassMethod = Class.forName("org.spongepowered.asm.mixin.transformer.MixinTransformer")
-                    .getDeclaredMethod("transformClass", MixinEnvironment.class, String.class, byte[].class);
-            transformClassMethod.setAccessible(true);
-
-            String className = "name";
-            byte[] classBytes = new byte[0];
-            byte[] newClassBytes = (byte[])transformClassMethod.invoke(
-                    currentTransformer,
-                    currentEnvironment,
-                    className,
-                    classBytes
-            );
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }*/
 }
