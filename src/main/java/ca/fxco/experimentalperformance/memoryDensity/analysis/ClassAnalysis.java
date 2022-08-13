@@ -1,9 +1,9 @@
 package ca.fxco.experimentalperformance.memoryDensity.analysis;
 
+import ca.fxco.experimentalperformance.memoryDensity.mixinHacks.HacktasticClassLoader;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldNode;
 import org.openjdk.jol.info.ClassData;
@@ -15,8 +15,6 @@ import org.openjdk.jol.layouters.Layouter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
 
 public class ClassAnalysis {
 
@@ -51,32 +49,38 @@ public class ClassAnalysis {
         return classData;
     }
 
-    private static ClassData createClassData(@NotNull ClassNode classNode, boolean privateOnly, Set<String> validFields) {
+    private static ClassData createClassData(@NotNull ClassNode classNode, byte[] classBytes, boolean privateOnly, Set<String> validFields) {
         String className = classNode.name;
         ClassData classData = new ClassData(className);
+
+        // Get class without loading it with the normal classLoaders
+        HacktasticClassLoader hackyClassLoader = new HacktasticClassLoader();
+        Class clazz = hackyClassLoader.defineClass(className, classBytes);
+
         for (FieldNode field : classNode.fields) {
             if (validFields != null && validFields.contains(field.name)) continue;
             if ((field.access & Opcodes.ACC_STATIC) != 0) continue; // If isStatic
             if (privateOnly && (field.access & Opcodes.ACC_PRIVATE) == 0) continue; // If not private and privateOnly
-            classData.addField(FieldData.create(className, field.name, Type.getType(field.desc).getClassName()));
+            try {
+                classData.addField(FieldData.parse(clazz.getDeclaredField(field.name)));
+            } catch (NoSuchFieldException e) {
+                e.printStackTrace();
+            }
         }
         return classData;
     }
 
-    public Future<AnalysisResults> runAnalysis(Class<?> clazz, @Nullable Set<String> validFields) {
-        return CompletableFuture.supplyAsync(() -> {
-            ClassLayout classLayout = layouter.layout(createClassData(clazz, false, validFields));
-            ClassLayout privateClassLayout = layouter.layout(createClassData(clazz, true, validFields));
-            return new AnalysisResults(classLayout, privateClassLayout);
-        });
+    public AnalysisResults runAnalysis(@NotNull Class<?> clazz, @Nullable Set<String> validFields) {
+        ClassLayout classLayout = layouter.layout(createClassData(clazz, false, validFields));
+        ClassLayout privateClassLayout = layouter.layout(createClassData(clazz, true, validFields));
+        return new AnalysisResults(classLayout, privateClassLayout);
     }
 
-    public Future<AnalysisResults> runAnalysis(ClassNode classNode, @Nullable Set<String> validFields) {
-        return CompletableFuture.supplyAsync(() -> {
-            ClassLayout classLayout = layouter.layout(createClassData(classNode, false, validFields));
-            ClassLayout privateClassLayout = layouter.layout(createClassData(classNode, true, validFields));
-            return new AnalysisResults(classLayout, privateClassLayout);
-        });
+    public AnalysisResults runAnalysis(@NotNull ClassNode classNode, byte[] classBytes, @Nullable Set<String> validFields) {
+        if (classBytes == null || classBytes.length == 0) return null;
+        ClassLayout classLayout = layouter.layout(createClassData(classNode, classBytes, false, validFields));
+        ClassLayout privateClassLayout = layouter.layout(createClassData(classNode, classBytes, true, validFields));
+        return new AnalysisResults(classLayout, privateClassLayout);
     }
 
     class AnalysisResults {

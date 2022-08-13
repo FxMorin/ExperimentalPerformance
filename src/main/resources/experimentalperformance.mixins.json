@@ -4,7 +4,10 @@
   "package": "ca.fxco.experimentalperformance.mixin",
   "compatibilityLevel": "JAVA_17",
   "plugin": "ca.fxco.experimentalperformance.config.SimpleConfigMixinPlugin",
-  "mixins": [],
+  "priority": 50000,
+  "mixins": [
+    "ExperimentalPerformanceMixin"
+  ],
   "injectors": {
     "defaultRequire": 1
   }
