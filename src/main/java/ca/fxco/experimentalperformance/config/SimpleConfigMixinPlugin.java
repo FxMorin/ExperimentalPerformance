@@ -34,34 +34,30 @@ public class SimpleConfigMixinPlugin implements IMixinConfigPlugin {
         return null;
     }
 
+    // Happens right after all the configs where set (Cause of the plugin priority)
+    // and before `getMixins()` so we can still inject our newly created mixins
     @Override
-    public void acceptTargets(Set<String> myTargets, Set<String> otherTargets) {
-        // EarlyEntrypoint has done its job
-        myTargets.remove("ca.fxco.experimentalperformance.ExperimentalPerformance");
+    public void acceptTargets(Set<String> myTargets, Set<String> otherTargets) {}
 
+    @Override
+    public List<String> getMixins() {
         if (firstEarlyEntrypoint) {
             firstEarlyEntrypoint = false;
-
             // Now do some logic
             transformationManager = new TransformationManager(this.mixinPackage);
             preloadMixins = new PreLoadMixins();
             ExperimentalPerformance.CONFIG.parseConfig();
             preloadMixins.PreLoadAllMixins();
-            Map<String, InfoHolderData> allInfoHolderData = new HashMap<>();
 
             // Here you will run all the infoHolders. - Run built-in holder data list first
+            Map<String, InfoHolderData> allInfoHolderData = new HashMap<>();
             HolderPatcher.attemptToAddHolders(allInfoHolderData, HolderDataRegistry.infoHolderDataMap);
             HolderPatcher.attemptToAddVersionedHolders(allInfoHolderData, HolderDataRegistry.versionedInfoHolderDataMap);
-
             for (Map.Entry<String, InfoHolderData> entry : allInfoHolderData.entrySet())
                 entry.getValue().apply(entry.getKey(), transformationManager);
             transformationManager.onLoad();
         }
-    }
-
-    @Override
-    public List<String> getMixins() {
-        return transformationManager.onGetMixins();
+        return transformationManager.onGetMixins(); // Add new mixins
     }
 
     @Override

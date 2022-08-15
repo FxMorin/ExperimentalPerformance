@@ -121,7 +121,6 @@ public class ClassAnalysisManager {
             this.className = className;
             this.instanceSize = instanceSize;
             this.privateInstanceSize = privateInstanceSize;
-            ExperimentalPerformance.LOGGER.info(this.toString());
         }
 
         @Override

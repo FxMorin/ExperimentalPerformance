@@ -3,9 +3,9 @@ package ca.fxco.experimentalperformance.memoryDensity.mixinHacks;
 import ca.fxco.experimentalperformance.ExperimentalPerformance;
 import ca.fxco.experimentalperformance.memoryDensity.analysis.ClassAnalysisManager;
 import ca.fxco.experimentalperformance.memoryDensity.analysis.FieldReferenceAnalysis;
-import ca.fxco.experimentalperformance.utils.asm.AsmUtils;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.MixinEnvironment;
+import org.spongepowered.asm.transformers.TreeTransformer;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -27,35 +27,32 @@ public class PreLoadMixins {
         ExperimentalPerformance.LOGGER.info("Attempting to pre-load all mixin!");
 
         // TODO: Check if some config's failed and if we need to remove any configs from our list
-        Map<String, byte[]> classBytes = getAllMixinClassBytes(); // Do reflection to get class bytes
-        Map<String, ClassNode> classNodes = new HashMap<>();
-        for (Map.Entry<String, byte[]> entry : classBytes.entrySet()) { // Convert to ASM & scan
-            ClassNode node = AsmUtils.getClassNodeFromBytecode(entry.getValue());
-            this.fieldReferenceAnalysis.scanClassNode(node);
-            classNodes.put(node.name, node);
+        List<ClassNode> classNodes = getAllMixinClassNodes(); // Do reflection to get class bytes
+        for (ClassNode classNode : classNodes) {
+            this.fieldReferenceAnalysis.scanClassNode(classNode);
         }
         ExperimentalPerformance.LOGGER.info("Identify & Remove HOT fields, they make everyone else look bad!");
         this.fieldReferenceAnalysis.processHotFields();
         this.fieldReferenceAnalysis.processFieldData(classNodes);
         // Pass fieldReferenceAnalysis in order to remove the hot fields from the private field analysis
         this.classAnalysisManager.runBulkClassNodeAnalysis(
-                new ArrayList<>(classNodes.values()),
+                classNodes,
                 this.fieldReferenceAnalysis
         );
         // Pass classAnalysisManager in order to get the field sizes and also to scan newly created holders
         this.fieldReferenceAnalysis.generateInfoHolderData(this.classAnalysisManager);
     }
 
-    public static Map<String, byte[]> getAllMixinClassBytes() {
+    public static List<ClassNode> getAllMixinClassNodes() {
         try {
             // Get KnotClassDelegate in order to access `getPostMixinClassByteArray()`
             Class<?> knotClassLoaderClass = ExperimentalPerformance.KNOT_CLASS_LOADER.getClass();
             Field delegateField = knotClassLoaderClass.getDeclaredField("delegate");
             delegateField.setAccessible(true);
             Object delegate = delegateField.get(ExperimentalPerformance.KNOT_CLASS_LOADER);
-            Method getPostMixinMethod = delegate.getClass()
-                    .getDeclaredMethod("getPostMixinClassByteArray", String.class, boolean.class);
-            getPostMixinMethod.setAccessible(true);
+            Method getRawClassBytesMethod = delegate.getClass()
+                    .getDeclaredMethod("getRawClassBytes", String.class);
+            getRawClassBytesMethod.setAccessible(true);
 
             // Get MixinProcessor in order to access `pendingConfigs`
             MixinEnvironment currentEnvironment = MixinEnvironment.getCurrentEnvironment();
@@ -68,8 +65,27 @@ public class PreLoadMixins {
             List<Object> pendingConfigs = (List<Object>)pendingConfigsField.get(mixinProcessor);
             ExperimentalPerformance.LOGGER.info("Mixin configs to scan: " + pendingConfigs.size());
 
+            // Swap configs
+            Field configsField = mixinProcessor.getClass().getDeclaredField("configs");
+            configsField.setAccessible(true);
+            List<Object> configs = (List<Object>)configsField.get(mixinProcessor);
+
+           // List<Object> configsBackup = new ArrayList<>(configs);
+            //configs.clear();
+            //configs.addAll(pendingConfigs);
+
+            // Get readClass method from MixinTransformer
+            Method readClassMethod = TreeTransformer.class
+                    .getDeclaredMethod("readClass", String.class, byte[].class, boolean.class);
+            readClassMethod.setAccessible(true);
+
+            // Get applyMixins method from MixinProcessor
+            Method applyMixinsMethod = mixinProcessor.getClass()
+                    .getDeclaredMethod("applyMixins", MixinEnvironment.class, String.class, ClassNode.class);
+            applyMixinsMethod.setAccessible(true);
+
             // Get `unhandledTargets` for each pendingConfig
-            Map<String, byte[]> classBytes = new HashMap<>();
+            Map<String, ClassNode> classNodes = new HashMap<>();
             for (Object mixinConfig : pendingConfigs) {
                 // Make sure it's not this mod's config, you skip that one
                 Field nameField = mixinConfig.getClass().getDeclaredField("name");
@@ -85,12 +101,25 @@ public class PreLoadMixins {
                 Set<String> targets = (Set<String>) unhandledTargetsField.get(mixinConfig);
                 //Set<String> targets = (Set<String>) getTargetsMethod.invoke(mixinConfig);
                 ExperimentalPerformance.LOGGER.info("Targets Found: " + targets.size());
-                for (String className : targets)
-                    if (!classBytes.containsKey(className))
-                        classBytes.put(className, (byte[]) getPostMixinMethod.invoke(delegate, className, false));
+                for (String className : targets) {
+                    if (!classNodes.containsKey(className)) {
+                        try {
+                            byte[] rawBytes = (byte[]) getRawClassBytesMethod.invoke(delegate, className);
+                            ClassNode classNode = (ClassNode) readClassMethod.invoke(
+                                    currentTransformer, className, rawBytes, false
+                            );
+                            applyMixinsMethod.invoke(mixinProcessor, currentEnvironment, className, classNode);
+                            classNodes.put(className, classNode);
+                        } catch (Exception e) {
+                            throw new RuntimeException("Failed to invoke methods for class: " + className, e);
+                        }
+                    }
+                }
             }
-            ExperimentalPerformance.LOGGER.info("Class bytes gathered: " + classBytes.size());
-            return classBytes;
+            //configs.clear();
+            //configs.addAll(configsBackup);
+            ExperimentalPerformance.LOGGER.info("Class nodes gathered: " + classNodes.size());
+            return new ArrayList<>(classNodes.values());
         } catch (Exception e) {
             throw new RuntimeException("Unable to generate classBytes", e);
         }

@@ -36,7 +36,6 @@ public class FieldReferenceAnalysis {
         ExperimentalPerformance.LOGGER.info("Amt AnalysisResults: " + classAnalysisManager.resultAmt());
         classAnalysisManager.forEach(analysisResults -> {
             String className = analysisResults.className;
-            //ExperimentalPerformance.LOGGER.info(className);
             if (this.fieldRefData.containsKey(className)) {
                 InfoHolderData infoHolderData = generateHolder(classAnalysisManager, analysisResults, className);
                 if (infoHolderData != null) {
@@ -86,7 +85,7 @@ public class FieldReferenceAnalysis {
         this.fieldRefCounter.entrySet().removeIf(each -> {
             final HashMap<String, AtomicInteger> value = each.getValue();
             value.entrySet().removeIf(entry -> {
-                boolean shouldRemove = entry.getValue().get() > 10;
+                boolean shouldRemove = entry.getValue().get() > 8;
                 if (shouldRemove) {
                     fieldRemovalCount.getAndIncrement();
                     fieldAverageReferenceSize.addAndGet(entry.getValue().get());
@@ -99,51 +98,45 @@ public class FieldReferenceAnalysis {
         });
         ExperimentalPerformance.LOGGER.info(
                 "HotFields removed " + fieldRemovalCount.get() + " fields with an average of " +
-                        (fieldAverageReferenceSize.get()/fieldRemovalCount.get()) +
+                        (fieldRemovalCount.get() == 0 ? "-" : (fieldAverageReferenceSize.get() / fieldRemovalCount.get())) +
                         " references each. This removed a total of " +
                         classRemovalCount.get() + " classes"
         );
     }
 
     // This method will remove all public and static fields from the analysis
-    public void processFieldData(Map<String, ClassNode> classNodes) {
-        for (Map.Entry<String, HashMap<String, AtomicInteger>> entry : this.fieldRefCounter.entrySet()) {
-            String className = entry.getKey();
-            ClassNode classNode = classNodes.get(className);
-            if (classNode == null) continue;
-            ExperimentalPerformance.LOGGER.info(classNode.name);
-
+    public void processFieldData(List<ClassNode> classNodes) {
+        for (ClassNode classNode : classNodes) {
+            String className = classNode.name;
+            HashMap<String, AtomicInteger> fieldVal = this.fieldRefCounter.get(className);
+            if (fieldVal == null) continue;
             HashMap<Integer, FieldNode> fields = this.fieldRefData.computeIfAbsent(className, c -> new HashMap<>());
+            Set<String> fieldNames = new HashSet<>();
             for (FieldNode fieldNode : classNode.fields) {
                 if ((fieldNode.access & Opcodes.ACC_STATIC) != 0) continue; // If isStatic
+                fieldNames.add(fieldNode.name);
                 if ((fieldNode.access & Opcodes.ACC_PRIVATE) == 0) continue; // If not private
-                //ExperimentalPerformance.LOGGER.info(className + "|" + fieldNode.name);
-                AtomicInteger integer = entry.getValue().get(fieldNode.name);
+                AtomicInteger integer = fieldVal.get(fieldNode.name);
                 if (integer == null) continue; // Was removed for being too hot
                 fields.put(integer.get(), fieldNode);
             }
+            ExperimentalPerformance.LOGGER.info(className + " - " + fieldNames);
         }
         this.fieldRefCounter.clear();
     }
 
     public void scanClassNode(ClassNode classNode) {
-        ExperimentalPerformance.LOGGER.info("Starting class node scanning for class: " + classNode.name);
         for (MethodNode methodNode : classNode.methods)
             scanMethodNode(methodNode);
     }
 
     public void scanMethodNode(MethodNode methodNode) {
-        for (AbstractInsnNode insnNode : methodNode.instructions) {
-            if (insnNode instanceof FieldInsnNode fieldInsn) {
-                //ExperimentalPerformance.LOGGER.info("FieldInsnNode) owner: " + fieldInsn.owner + " - name: " + fieldInsn.name + " - desc: " + fieldInsn.desc);
-                if (fieldInsn.owner.startsWith(MINECRAFT_PACKAGE)) {
-                    //System.out.println(fieldInsn.owner + "|" + fieldInsn.name);
+        for (AbstractInsnNode insnNode : methodNode.instructions)
+            if (insnNode instanceof FieldInsnNode fieldInsn)
+                if (fieldInsn.owner.startsWith(MINECRAFT_PACKAGE))
                     this.fieldRefCounter
                             .computeIfAbsent(fieldInsn.owner, c -> new HashMap<>())
                             .computeIfAbsent(fieldInsn.name, f -> new AtomicInteger(0))
                             .incrementAndGet();
-                }
-            }
-        }
     }
 }

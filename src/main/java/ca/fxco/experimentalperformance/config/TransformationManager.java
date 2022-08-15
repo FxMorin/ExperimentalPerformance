@@ -75,8 +75,6 @@ public class TransformationManager {
     private void addMixinClass(String className) {
         this.loadAsMixins.add(formatPathDot(className));
         String fullName = this.mixinPackage + className;
-        if (ExperimentalPerformance.VERBOSE)
-            ExperimentalPerformance.LOGGER.info("Generating " + fullName + " with target " + className);
         this.mixinClassModifiers.put('/' + fullName + CLASS_EXT, makeMixinBlob(fullName, className));
     }
 

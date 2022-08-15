@@ -1,7 +1,6 @@
 package ca.fxco.experimentalperformance.config;
 
 import ca.fxco.experimentalperformance.ExperimentalPerformance;
-import ca.fxco.experimentalperformance.memoryDensity.HolderDataRegistry;
 import ca.fxco.experimentalperformance.memoryDensity.InfoHolderData;
 import ca.fxco.experimentalperformance.memoryDensity.VersionedInfoHolderData;
 import net.fabricmc.loader.api.FabricLoader;
@@ -21,6 +20,10 @@ import static ca.fxco.experimentalperformance.memoryDensity.HolderDataRegistry.v
  */
 
 public class SimpleConfig {
+
+    // TODO: This is going to need a major rewrite, currently its not even being used. It should instead be a package
+    //      limited. Something like "net.minecraft.client.*"=false to disable entire packages. Since its automatic
+    //      now, so you have no idea what classes will be modified!
 
     private final Path configPath;
     private boolean parsed = false;

@@ -64,7 +64,7 @@ public class HolderDataRegistry {
     );
 
 
-    public static final Map<String, InfoHolderData> infoHolderDataMap = new HashMap<>() {{
+    /*public static final Map<String, InfoHolderData> infoHolderDataMap = new HashMap<>() {{
         put(ep("Block"), infoHolder_Block);
         put(ep("EntityExtreme"), infoHolder_EntityExtreme);
     }};
@@ -72,5 +72,9 @@ public class HolderDataRegistry {
     public static final Map<String, VersionedInfoHolderData> versionedInfoHolderDataMap = Map.of(
             ep("Chunk"), infoHolder_Chunk,
             ep("Entity"), infoHolder_Entity
-    );
+    );*/
+
+    public static final Map<String, InfoHolderData> infoHolderDataMap = new HashMap<>();
+
+    public static final Map<String, VersionedInfoHolderData> versionedInfoHolderDataMap = Map.of();
 }
