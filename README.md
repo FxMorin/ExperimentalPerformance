@@ -30,7 +30,11 @@ Performance is hard to get more of, it's a very complex puzzle which requires yo
 Put simply, computers are not simple. They try really hard to make it easier for the programmer to not think about it, although programmers should be thinking about it at all times.  
 What am I talking about?  
 Well the performance I get with this mod comes at a cost, extra calls and memory allocation. I'm simply optimizing the structures within the game to work as smoothly and quickly with the computer, although that requires the computer to remember more things.  
-Unfortunately, you won't notice that cost since in most of these situations the performance win greatly overcomes the loss.  
+Unfortunately, you won't notice that cost since in most of these situations the performance win greatly overcomes the loss. 
+
+### Experimental!!!
+Seems I need to continue saying it. This mod is highly experimental and does some super sketch ASM magic to gain performance by simply moving classes around. Do not include this in modpacks, and do not make issues about compatibility.
+This mod was made as a proof of concept to see if we could further optimize minecraft by reducing the classes sizes in the cache lines. This mod showed a clear performance win, although its pretty untested and still needs LOTS of work. I don't have time to continue working on this mod currently
   
 ### Thanks to  
 [LlamaLad7](https://github.com/LlamaLad7) - Large contribution to the ASM logic in order to make it much simpler with less overhead  
