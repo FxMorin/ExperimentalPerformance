@@ -33,7 +33,7 @@ Well the performance I get with this mod comes at a cost, extra calls and memory
 Unfortunately, you won't notice that cost since in most of these situations the performance win greatly overcomes the loss. 
 
 ### Experimental!!!
-Seems I need to continue saying it. This mod is highly experimental and does some super sketch ASM magic to gain performance by simply moving classes around. Do not include this in modpacks, and do not make issues about compatibility.
+Seems I need to continue saying it. This mod is highly experimental and does some super-hacky ASM magic to gain performance by simply moving classes around. Do not include this in modpacks, and do not make issues about compatibility.
 This mod was made as a proof of concept to see if we could further optimize minecraft by reducing the classes sizes in the cache lines. This mod showed a clear performance win, although its pretty untested and still needs LOTS of work. I don't have time to continue working on this mod currently
   
 ### Thanks to  
